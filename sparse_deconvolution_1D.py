@@ -40,7 +40,15 @@ def dirichlet_kernel(x, n):
         float
 
     """
-    return np.divide(np.sin((n + .5)*x), (2*np.pi*np.sin(x/2)))
+    x = np.array(x)
+    y = np.zeros(x.shape)
+    indeterminate = np.mod(x, 2*np.pi) == 0
+    y[indeterminate] = 2*n + 1
+    y[~indeterminate] = np.divide(
+        np.sin((n + .5)*x[~indeterminate]),
+        (2*np.pi*np.sin(x[~indeterminate]/2))
+    )
+    return y
 
 
 def draw_positions_1D(m):
@@ -139,6 +147,6 @@ def paper_env(m0):
     def _phi(w, theta): return phi(w, theta, psi)  # weighted translate
     def V(w, theta): return np.abs(w)  # regularization
     def _y(x): return y(x, w, p, psi)  # noisy observation
-    def _R(f): return R(f, y, lbd=1)
+    def _R(f): return R(f, _y, lbd=1)
 
     return Env(R=_R, phi=_phi, V=V, y=_y, g=_g, w=w, p=p)
