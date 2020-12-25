@@ -130,7 +130,8 @@ def paper_env(m0):
     --------
         Env namedtuple
     """
-    w = np.random.uniform(0.5, 1.5, size=m0)  # weights
+    signs = 2*np.random.binomial(n=1, p=0.5, size=m0) - 1  # weight signs
+    w = signs*np.random.uniform(0.5, 1.5, size=m0)  # weights
     p = draw_positions_1D(m0)  # positions
 
     def _g(x): return spikes_1D(x, w, p)  # ground truth
