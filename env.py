@@ -2,4 +2,4 @@
 from collections import namedtuple
 
 
-Env = namedtuple('Env', 'R phi V y g')
+Env = namedtuple('Env', 'R phi V y g w p')

@@ -27,7 +27,7 @@ def spikes_1D(x, w, p):
 
 
 def dirichlet_kernel(x, n):
-    """Dirichlet kernel of given order.
+    """Dirichlet kernel of given order (2 pi periodic).
 
     Args:
     -----
@@ -56,8 +56,8 @@ def draw_positions_1D(m):
         p : array of shape (m,)
 
     """
-    chunks = np.random.choice(10, size=m0, replace=False)
-    return (chunks + np.random.uniform(0, 1, size=m0))/10
+    chunks = np.random.choice(10, size=m, replace=False)
+    return (chunks + np.random.uniform(0, 1, size=m))/10
 
 
 def y(x, w, p, psi):
@@ -132,11 +132,11 @@ def paper_env(m0):
     w = np.random.uniform(0.5, 1.5, size=m0)  # weights
     p = draw_positions_1D(m0)  # positions
 
-    def g(x): return spikes_1D(x, w, p)  # ground truth
-    def psi(x): return dirichlet_kernel(x, n=7)  # filter
+    def _g(x): return spikes_1D(x, w, p)  # ground truth
+    def psi(x): return dirichlet_kernel(2*np.pi*x, n=7)  # filter
     def _phi(w, theta): return phi(w, theta, psi)  # weighted translate
     def V(w, theta): return np.abs(w)  # regularization
     def _y(x): return y(x, w, p, psi)  # noisy observation
     def _R(f): return R(f, y, lbd=1)
 
-    return Env(R=_R, phi=_phi, V=V, y=_y, g=_g)
+    return Env(R=_R, phi=_phi, V=V, y=_y, g=_g, w=w, p=p)
