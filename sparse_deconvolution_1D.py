@@ -39,3 +39,20 @@ def dirichlet_kernel(x, n):
 
     """
     return np.sin((N + .5)*x)/(2*np.pi*np.sin(x/2))
+
+
+def draw_positions_1D(m):
+    """Draw positions in (0, 1) with a minimum separaton of 0.1.
+
+    Args:
+    -----
+        m : int
+            Number of positions to draw.
+
+    Returns:
+    --------
+        p : array of shape (m,)
+
+    """
+    chunks = np.random.choice(10, size=m0, replace=False)
+    return (chunks + np.random.uniform(0, 1, size=m0))/10
