@@ -56,7 +56,8 @@ def draw_positions_1D(m):
         p : array of shape (m,)
 
     """
-    chunks = np.random.choice(10, size=m, replace=False)
+    odd = np.random.binomial(n=1, p=0.5)
+    chunks = np.random.choice(np.arange(odd, 11, 2), size=m, replace=False)
     return (chunks + np.random.uniform(0, 1, size=m))/10
 
 
