@@ -95,8 +95,8 @@ def R(f, y, lbd):
 
     Args:
     -----
-        f : np.array of shape (N,)
-            Values of f on (0, 1) equally spaced
+        f : np.array of shape (d, N)
+            N values of d functions f on (0, 1) equally spaced
         y : callable
         lbd : float
 
@@ -105,9 +105,11 @@ def R(f, y, lbd):
         float
 
     """
-    N = f.shape[0]
+    f = np.array(f)
+    f = np.reshape(1, -1) if len(f.shape) == 1 else f
+    N = f.shape[1]
     linspace = np.linspace(0, 1, N)
-    return 1/(2*lbd*N)*np.sum(np.power(f - y(linspace), 2))
+    return 1/(2*lbd*N)*np.sum(np.power(f - y(linspace)[None, :], 2), axis=1)
 
 
 def phi(w, theta, psi):
