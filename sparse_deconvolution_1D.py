@@ -65,7 +65,7 @@ def draw_positions_1D(m):
 
     """
     odd = np.random.binomial(n=1, p=0.5)
-    chunks = np.random.choice(np.arange(odd, 11, 2), size=m, replace=False)
+    chunks = np.random.choice(np.arange(odd, 10, 2), size=m, replace=False)
     return (chunks + np.random.uniform(0, 1, size=m))/10
 
 
@@ -106,7 +106,7 @@ def R(f, y, lbd):
 
     """
     f = np.array(f)
-    f = np.reshape(1, -1) if len(f.shape) == 1 else f
+    f = f.reshape(1, -1) if len(f.shape) == 1 else f
     N = f.shape[1]
     linspace = np.linspace(0, 1, N)
     return 1/(2*lbd*N)*np.sum(np.power(f - y(linspace)[None, :], 2), axis=1)
