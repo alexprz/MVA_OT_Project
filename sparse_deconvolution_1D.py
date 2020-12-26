@@ -156,4 +156,8 @@ def paper_env(m0):
     def _y(x): return y(x, w, p, psi)  # noisy observation
     def _R(f): return R(f, _y, lbd=1)
 
-    return Env(R=_R, phi=_phi, V=V, y=_y, g=_g, w=w, p=p)
+    x_min = np.array([0])
+    x_max = np.array([1])
+
+    return Env(R=_R, phi=_phi, V=V, y=_y, g=_g, w=w, p=p,
+               x_min=x_min, x_max=x_max)
