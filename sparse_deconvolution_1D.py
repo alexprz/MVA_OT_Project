@@ -112,20 +112,24 @@ def R(f, y, lbd):
     return 1/(2*lbd*N)*np.sum(np.power(f - y(linspace)[None, :], 2), axis=1)
 
 
-def phi(w, theta, psi):
+def phi(w, theta, x, psi):
     """Implement the phi function.
 
     Args:
     -----
         w : np.array of shape (m,)
-        theta : np.array of shape (d,)
+        theta : np.array of shape (m, d)
+        x : np.array of shape (N, d)
+        psi : callable
 
     Returns:
     --------
-        callable np.array of shape (d,) -> np.array of shape (m,)
+        np.array of shape (m, N)
 
     """
-    return lambda x: psi(x - theta)*w
+    x = x.reshape(-1, 1) if x.ndim == 1 else x
+    theta = theta.reshape(-1, 1) if theta.ndim == 1 else theta
+    return w[:, None]*psi(x[None, :, :] - theta[:, None, :])
 
 
 def paper_env(m0):
@@ -146,7 +150,7 @@ def paper_env(m0):
 
     def _g(x): return spikes_1D(x, w, p)  # ground truth
     def psi(x): return dirichlet_kernel(2*np.pi*x, n=7)  # filter
-    def _phi(w, theta): return phi(w, theta, psi)  # weighted translate
+    def _phi(w, theta, x): return phi(w, theta, x, psi)  # weighted translate
     def V(w, theta): return np.abs(w)  # regularization
     def _y(x): return y(x, w, p, psi)  # noisy observation
     def _R(f): return R(f, _y, lbd=1)

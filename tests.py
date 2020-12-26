@@ -41,3 +41,14 @@ class TestSparseDeconvolution(unittest.TestCase):
         assert r1.shape == (1, )
         assert r2.shape == (1,)
         assert r3.shape == (2,)
+
+    @given(env=env())
+    def test_phi(self, env):
+        m, N = 10, 5
+        f = env.phi(w=np.arange(m), theta=np.ones(m), x=np.linspace(0, 1, N))
+        assert f.shape == (m, N)
+
+        m, N, d = 10, 5, 1
+        f = env.phi(w=np.arange(m), theta=np.ones((m, d)),
+                    x=np.linspace(0, 1, N))
+        assert f.shape == (m, N)
