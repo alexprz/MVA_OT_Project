@@ -129,6 +129,7 @@ def phi(w, theta, x, psi):
     """
     x = x.reshape(-1, 1) if x.ndim == 1 else x
     theta = theta.reshape(-1, 1) if theta.ndim == 1 else theta
+    w = np.squeeze(w)
     return w[:, None]*psi(x[None, :, :] - theta[:, None, :])
 
 
