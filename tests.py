@@ -55,3 +55,19 @@ class TestSparseDeconvolution(unittest.TestCase):
         f = env.phi(w=np.ones((m, 1)), theta=np.ones((m, d)),
                     x=np.linspace(0, 1, N))
         assert f.shape == (m, N)
+
+    @given(env=env())
+    def test_grad_R(self, env):
+        w = np.arange(10)
+        theta = np.arange(10)
+        grad_w, grad_theta = env.grad_R(w, theta, np.ones(10))
+
+        assert grad_w.shape == w.shape
+        assert grad_theta.shape == theta.shape
+
+        w = np.ones((10, 1))
+        theta = np.ones((10, 1))
+        grad_w, grad_theta = env.grad_R(w, theta, np.ones(10))
+
+        assert grad_w.shape == (w.shape[0],)
+        assert grad_theta.shape == (theta.shape[0],)

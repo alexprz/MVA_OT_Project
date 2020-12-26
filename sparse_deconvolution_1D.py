@@ -51,6 +51,21 @@ def dirichlet_kernel(x, n):
     return y
 
 
+def dirichlet_kernel_dx(x, n):
+    x = np.squeeze(np.array(x))
+    y = np.zeros(x.shape)
+    indeterminate = np.mod(x, 2*np.pi) == 0
+    y[indeterminate] = 0
+
+    z = x[~indeterminate]
+    a = n + .5
+    b = .5
+    num = a*np.cos(a*z)*np.sin(b*z) - b*np.cos(b*z)*np.sin(a*z)
+    denom = np.power(np.sin(b*z), 2)
+    y[~indeterminate] = np.divide(num, denom)
+    return y
+
+
 def draw_positions_1D(m):
     """Draw positions in (0, 1) with a minimum separaton of 0.1.
 
@@ -69,14 +84,14 @@ def draw_positions_1D(m):
     return (chunks + np.random.uniform(0, 1, size=m))/10
 
 
-def y(x, w, p, psi):
+def y(x, w, theta, psi):
     """Implement the y function.
 
     Args:
     -----
         x : np.array of shape (N,) or scalar
         w : np.array of shape (m,)
-        p : np.array of shape (m,)
+        theta : np.array of shape (m,)
         psi : callable
 
     Returns:
@@ -85,7 +100,7 @@ def y(x, w, p, psi):
 
     """
     x = np.array(x)
-    _y = np.dot(psi(x[:, None] - p[None, :]), w)
+    _y = np.dot(psi(x[:, None] - theta[None, :]), w)
     assert _y.shape == (x.shape[0], )
     return _y
 
@@ -110,6 +125,37 @@ def R(f, y, lbd):
     N = f.shape[1]
     linspace = np.linspace(0, 1, N)
     return 1/(2*lbd*N)*np.sum(np.power(f - y(linspace)[None, :], 2), axis=1)
+
+
+def grad_R(w, theta, x, y, psi, psi_p, lbd):
+    """Gradient of R wrt w and theta.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m,)
+        x : np.array of shape (n,)
+        y : callable
+        psi : callable
+        psi_p : callable
+        lbd : float
+
+    Returns:
+    --------
+        grad_w : np.array of shape (m,)
+        grad_theta : np.array of shape (m,)
+
+    """
+    m = w.shape[0]
+    theta = np.squeeze(theta)
+    w = np.squeeze(w)
+    dx = x[:, None] - theta[None, :]
+    psi_t = psi(dx)
+    z = (y(x) - np.dot(psi_t, w)/m)
+    grad_w = -np.mean(psi_t*z[:, None], axis=0)/(lbd*m)
+    grad_theta = np.mean(w[None, :]*psi_p(dx)*psi_t*z[:, None], axis=0)/(lbd*m)
+
+    return grad_w, grad_theta
 
 
 def phi(w, theta, x, psi):
@@ -151,13 +197,15 @@ def paper_env(m0):
 
     def _g(x): return spikes_1D(x, w, p)  # ground truth
     def psi(x): return dirichlet_kernel(2*np.pi*x, n=7)  # filter
+    def psi_p(x): return dirichlet_kernel_dx(2*np.pi*x, n=7)  # filter
     def _phi(w, theta, x): return phi(w, theta, x, psi)  # weighted translate
     def V(w, theta): return np.abs(w)  # regularization
     def _y(x): return y(x, w, p, psi)  # noisy observation
     def _R(f): return R(f, _y, lbd=1)
+    def _grad_R(w, theta, x): return grad_R(w, theta, x, _y, psi, psi_p, lbd=1)
 
     x_min = np.array([0])
     x_max = np.array([1])
 
     return Env(R=_R, phi=_phi, V=V, y=_y, g=_g, w=w, p=p,
-               x_min=x_min, x_max=x_max)
+               x_min=x_min, x_max=x_max, grad_R=_grad_R, psi=psi, psi_p=psi_p)
