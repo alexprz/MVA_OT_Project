@@ -40,10 +40,10 @@ def dirichlet_kernel(x, n):
         float
 
     """
-    x = np.array(x)
+    x = np.squeeze(np.array(x))
     y = np.zeros(x.shape)
     indeterminate = np.mod(x, 2*np.pi) == 0
-    y[indeterminate] = 2*n + 1
+    y[indeterminate] = (2*n + 1)/(2*np.pi)
     y[~indeterminate] = np.divide(
         np.sin((n + .5)*x[~indeterminate]),
         (2*np.pi*np.sin(x[~indeterminate]/2))
