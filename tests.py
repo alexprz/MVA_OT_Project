@@ -115,4 +115,15 @@ class TestFrowardBackward(unittest.TestCase):
                                                      lbd, n)
 
         assert w_new.shape == w.shape
-        assert theta_new.shape == theta_new.shape
+        assert theta_new.shape == theta.shape
+
+    @given(env=env())
+    def test_fb(self, env):
+        w0 = np.arange(10)
+        theta0 = np.arange(10)
+        n = 1000
+
+        w, theta = opt.forward_backward(env, w0, theta0, max_iter=2, n=n)
+
+        assert w.shape == w0.shape
+        assert theta.shape == theta0.shape

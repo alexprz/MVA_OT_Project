@@ -81,3 +81,35 @@ def forward_backward_step(env, w, theta, gamma, lbd, n=1000):
     theta = theta + lbd*(prox_theta_aux - theta)
 
     return w, theta
+
+
+def forward_backward(env, w0, theta0, max_iter, n=1000):
+    """Implement the forward backward algorithm to minimize f.
+
+    Args:
+    -----
+        env : Env named tuple
+        w0 : np.array of shape (m,)
+        theta0 : np.array of shape (m, d)
+        max_iter : int
+        n : int
+            Discretization for the integral computation
+
+    Returns:
+    --------
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+
+    """
+    w, theta = np.copy(w0), np.copy(theta0)
+    gamma = 1
+    lbd = 1
+
+    for k in range(max_iter):
+        w, theta = forward_backward_step(env, w, theta, gamma, lbd, n)
+
+        subgrad_w, subgrad_theta = subgrad_f_m(env, w, theta, n)
+        e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
+        print(f'iter {k}:\t e={e}')
+
+    return w, theta
