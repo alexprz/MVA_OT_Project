@@ -4,7 +4,7 @@ import unittest
 from hypothesis import strategies as strats
 from hypothesis import given
 
-from sparse_deconvolution_1D import paper_env
+import sparse_deconvolution_1D as sd1
 import optimizer as opt
 
 
@@ -12,7 +12,7 @@ import optimizer as opt
 def env(draw):
     seed = draw(strats.integers(0, 2**32 - 1))
     np.random.seed(seed)
-    return paper_env(5)
+    return sd1.paper_env(5)
 
 
 class TestSparseDeconvolution(unittest.TestCase):
