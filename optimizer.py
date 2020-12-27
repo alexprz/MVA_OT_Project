@@ -23,7 +23,8 @@ def f_m(env, w, theta, n=1000):
     else:
         raise NotImplementedError('Add case ndim > 1')
 
-    return env.R(env.phi(w, theta, x).mean(axis=0)) + env.V(w, theta).mean()
+    fm = env.R(env.phi(w, theta, x).mean(axis=0)) + env.V(w, theta).mean()
+    return fm.item()
 
 
 def forward_backward_step(env, w, theta, gamma, lbd, n=1000):

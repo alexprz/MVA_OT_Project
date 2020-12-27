@@ -5,7 +5,7 @@ from hypothesis import strategies as strats
 from hypothesis import given
 
 from sparse_deconvolution_1D import paper_env
-from optimizer import forward_backward_step
+import optimizer as opt
 
 
 @strats.composite
@@ -88,6 +88,13 @@ class TestFrowardBackward(unittest.TestCase):
     """Test the Forward Backward algo."""
 
     @given(env=env())
+    def test_f_m(self, env):
+        w = np.arange(10)
+        theta = np.arange(10)
+        fm = opt.f_m(env, w, theta, n=1000)
+        assert isinstance(fm, float)
+
+    @given(env=env())
     def test_step(self, env):
         w = np.arange(10)
         theta = np.arange(10)
@@ -95,7 +102,8 @@ class TestFrowardBackward(unittest.TestCase):
         lbd = 1
         n = 1000
 
-        w_new, theta_new = forward_backward_step(env, w, theta, gamma, lbd, n)
+        w_new, theta_new = opt.forward_backward_step(env, w, theta, gamma,
+                                                     lbd, n)
 
         assert w_new.shape == w.shape
         assert theta_new.shape == theta_new.shape
