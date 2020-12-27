@@ -95,6 +95,15 @@ class TestFrowardBackward(unittest.TestCase):
         assert isinstance(fm, float)
 
     @given(env=env())
+    def test_subgradient_f_m(self, env):
+        w = np.arange(10)
+        theta = np.arange(10)
+        subgrad_w, subgrad_theta = opt.subgrad_f_m(env, w, theta, n=1000)
+
+        assert subgrad_w.shape == w.shape
+        assert subgrad_theta.shape == theta.shape
+
+    @given(env=env())
     def test_step(self, env):
         w = np.arange(10)
         theta = np.arange(10)

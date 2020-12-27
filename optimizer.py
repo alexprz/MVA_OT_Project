@@ -27,6 +27,29 @@ def f_m(env, w, theta, n=1000):
     return fm.item()
 
 
+def subgrad_f_m(env, w, theta, n=1000):
+    """Evaluate a subgradient of the objective f_m.
+
+    Args:
+    -----
+        env : Env named tuple
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+        n : int
+            Discretization for the integral computation
+
+    Returns:
+    --------
+        subgrad_w : np.array of shape (m,)
+        subgrad_theta : np.array of shape (m, d)
+
+    """
+    x = np.linspace(env.x_min, env.x_max, n)
+    grad_R = env.grad_R(w, theta, x)
+    subgrad_V = env.subgrad_V(w, theta)
+    return grad_R[0] + subgrad_V[0], grad_R[1] + subgrad_V[1]
+
+
 def forward_backward_step(env, w, theta, gamma, lbd, n=1000):
     """Implement one step of the forward backward algo.
 

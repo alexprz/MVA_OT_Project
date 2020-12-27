@@ -158,6 +158,26 @@ def grad_R(w, theta, x, y, psi, psi_p, lbd):
     return grad_w, grad_theta
 
 
+def subgrad_V(w, theta):
+    """Return a subgradient of V.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m,)
+
+    Returns:
+    --------
+        subgrad_w : np.array of shape (m,)
+        subgrad_theta : np.array of shape (m,)
+
+    """
+    subgrad_w = np.sign(w)
+    subgrad_theta = np.zeros_like(theta)
+
+    return subgrad_w, subgrad_theta
+
+
 def prox_V(w, theta, gamma):
     """Compute the proximity operator of gamma*V.
 
@@ -228,5 +248,5 @@ def paper_env(m0):
     x_max = np.array([1])
 
     return Env(R=_R, phi=_phi, V=V, y=_y, g=_g, w=w, p=p,
-               x_min=x_min, x_max=x_max, grad_R=_grad_R, psi=psi, psi_p=psi_p,
-               prox_V=prox_V)
+               x_min=x_min, x_max=x_max, grad_R=_grad_R, subgrad_V=subgrad_V,
+               psi=psi, psi_p=psi_p, prox_V=prox_V)
