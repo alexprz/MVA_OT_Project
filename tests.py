@@ -71,3 +71,14 @@ class TestSparseDeconvolution(unittest.TestCase):
 
         assert grad_w.shape == (w.shape[0],)
         assert grad_theta.shape == (theta.shape[0],)
+
+    @given(env=env())
+    def test_prox_V(self, env):
+        w = np.arange(10)
+        theta = np.arange(10)
+        gamma = 1
+        prox_w, prox_theta = env.prox_V(w, theta, gamma)
+
+        assert prox_w.shape == w.shape
+        assert prox_theta.shape == theta.shape
+

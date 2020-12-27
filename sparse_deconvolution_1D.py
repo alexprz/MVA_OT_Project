@@ -158,6 +158,26 @@ def grad_R(w, theta, x, y, psi, psi_p, lbd):
     return grad_w, grad_theta
 
 
+def prox_V(w, theta, gamma):
+    """Compute the proximity operator of gamma*V.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m,)
+        gamma : float
+
+    Returns:
+        prox_w : np.array of shape (m,)
+        prox_theta : np.array of shape (m,)
+
+    """
+    prox_w = np.sign(w)*np.maximum(np.abs(w) - gamma, 0)
+    prox_theta = theta
+
+    return prox_w, prox_theta
+
+
 def phi(w, theta, x, psi):
     """Implement the phi function.
 
@@ -208,4 +228,5 @@ def paper_env(m0):
     x_max = np.array([1])
 
     return Env(R=_R, phi=_phi, V=V, y=_y, g=_g, w=w, p=p,
-               x_min=x_min, x_max=x_max, grad_R=_grad_R, psi=psi, psi_p=psi_p)
+               x_min=x_min, x_max=x_max, grad_R=_grad_R, psi=psi, psi_p=psi_p,
+               prox_V=prox_V)
