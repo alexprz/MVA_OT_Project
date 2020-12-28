@@ -83,7 +83,7 @@ def forward_backward_step(env, w, theta, gamma, lbd, n=1000):
     return w, theta
 
 
-def forward_backward(env, w0, theta0, max_iter, n=1000):
+def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
     """Implement the forward backward algorithm to minimize f.
 
     Args:
@@ -94,6 +94,7 @@ def forward_backward(env, w0, theta0, max_iter, n=1000):
         max_iter : int
         n : int
             Discretization for the integral computation
+        print_every : int
 
     Returns:
     --------
@@ -104,23 +105,23 @@ def forward_backward(env, w0, theta0, max_iter, n=1000):
     w, theta = np.copy(w0), np.copy(theta0)
     ws, thetas = [], []
 
-    nu = 1e3/env.lbd
+    # Parameters of the algorithm
+    nu = 5e2/env.lbd
     gamma = 1.99/nu
     delta = 2 - gamma*nu/2
     lbd = 0.99*delta
 
-    x = np.linspace(0, 1, n)
-
     for k in range(max_iter):
-        # print(theta)
-        fm = f_m(env, w, theta, n)
-        # print(f'fm {fm}')
         w, theta = forward_backward_step(env, w, theta, gamma, lbd, n)
         ws.append(w)
         thetas.append(theta)
+
+        # Check subgradient and objective value
         subgrad_w, subgrad_theta = subgrad_f_m(env, w, theta, n)
         e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
-        gRw, gRtheta = env.grad_R(w, theta, x)
-        print(f'iter {k}: \t e={e:.2e}\tfm={fm:.2e}')
+        fm = f_m(env, w, theta, n)
+
+        if print_every is not None and k % print_every == 0:
+            print(f'iter {k}: \t e={e:.2e} \t fm={fm:.2e}')
 
     return np.array(ws), np.array(thetas)
