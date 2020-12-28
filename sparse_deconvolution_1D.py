@@ -99,6 +99,7 @@ def y(x, w, theta, psi):
         y : np.array of shape (N,)
 
     """
+    m = w.shape[0]
     x = np.array(x)
     _y = np.dot(psi(x[:, None] - theta[None, :]), w)
     assert _y.shape == (x.shape[0], )
@@ -149,11 +150,11 @@ def grad_R(w, theta, x, y, psi, psi_p, lbd):
     m = w.shape[0]
     theta = np.squeeze(theta)
     w = np.squeeze(w)
-    dx = x[:, None] - theta[None, :]
-    psi_t = psi(dx)
-    z = (y(x) - np.dot(psi_t, w)/m)
-    grad_w = -np.mean(psi_t*z[:, None], axis=0)/(lbd*m)
-    grad_theta = np.mean(w[None, :]*psi_p(dx)*psi_t*z[:, None], axis=0)/(lbd*m)
+    dx = x[:, None] - theta[None, :]  # (n, m)
+    psi_t = psi(dx)  # (n, m)
+    z = (y(x) - np.dot(psi_t, w)/m)  # (n,)
+    grad_w = -np.mean(psi_t*z[:, None], axis=0)/(lbd*m)  # (m,)
+    grad_theta = w*np.mean(psi_p(dx)*z[:, None], axis=0)/(lbd*m)  # (m,)
 
     return grad_w, grad_theta
 
@@ -172,7 +173,8 @@ def subgrad_V(w, theta):
         subgrad_theta : np.array of shape (m,)
 
     """
-    subgrad_w = np.sign(w)
+    m = w.shape[0]
+    subgrad_w = np.sign(w)/m
     subgrad_theta = np.zeros_like(theta)
 
     return subgrad_w, subgrad_theta
@@ -192,7 +194,8 @@ def prox_V(w, theta, gamma):
         prox_theta : np.array of shape (m,)
 
     """
-    prox_w = np.sign(w)*np.maximum(np.abs(w) - gamma, 0)
+    m = w.shape[0]
+    prox_w = np.sign(w)*np.maximum(np.abs(w) - gamma/m, 0)
     prox_theta = theta
 
     return prox_w, prox_theta
@@ -234,6 +237,8 @@ def paper_env(m0):
     signs = 2*np.random.binomial(n=1, p=0.5, size=m0) - 1  # weight signs
     w = signs*np.random.uniform(0.5, 1.5, size=m0)  # weights
     p = draw_positions_1D(m0)  # positions
+    lbd = 0.2
+    # lbd = 0.05
 
     def _g(x): return spikes_1D(x, w, p)  # ground truth
     def psi(x): return dirichlet_kernel(2*np.pi*x, n=7)  # filter
@@ -241,12 +246,12 @@ def paper_env(m0):
     def _phi(w, theta, x): return phi(w, theta, x, psi)  # weighted translate
     def V(w, theta): return np.abs(w)  # regularization
     def _y(x): return y(x, w, p, psi)  # noisy observation
-    def _R(f): return R(f, _y, lbd=1)
-    def _grad_R(w, theta, x): return grad_R(w, theta, x, _y, psi, psi_p, lbd=1)
+    def _R(f): return R(f, _y, lbd=lbd)
+    def _grad_R(w, theta, x): return grad_R(w, theta, x, _y, psi, psi_p, lbd=lbd)
 
     x_min = np.array([0])
     x_max = np.array([1])
 
     return Env(R=_R, phi=_phi, V=V, y=_y, g=_g, w=w, p=p,
                x_min=x_min, x_max=x_max, grad_R=_grad_R, subgrad_V=subgrad_V,
-               psi=psi, psi_p=psi_p, prox_V=prox_V)
+               psi=psi, psi_p=psi_p, prox_V=prox_V, lbd=lbd)
