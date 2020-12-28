@@ -1,4 +1,5 @@
 """Implement the sparse deconvolution experience of the paper."""
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -31,17 +32,18 @@ for i, p in enumerate(env.p):
                linewidth=1, label=label)
 
 # Initialize the particles
-m = 30  # Number of particles
+m = 20  # Number of particles
 w0 = np.zeros(m)  # Weights
 theta0 = np.arange(m)/m  # Positions (uniformly spaced)
-n = 100  # Discretization (for integral computation)
-max_iter = 300000
+n = 50  # Discretization (for integral computation)
+max_iter = 1000000
 
 # Plot initial particles
 plt.scatter(theta0, w0, color='blue', marker='.')
 
 # Apply the forward backward algorithm
-ws, thetas = opt.forward_backward(env, w0, theta0, max_iter=max_iter, n=n)
+ws, thetas = opt.forward_backward(env, w0, theta0, max_iter=max_iter, n=n,
+                                  print_every=100)
 
 # Plot the final particles
 plt.scatter(thetas[-1, :], ws[-1, :], color='red', marker='.', label='Particle')
@@ -55,6 +57,12 @@ for k in range(m):
 y_min, y_max = ax.get_ylim()
 max_ylim = max(abs(y_min), abs(y_max))
 ax.set_ylim(-max_ylim, max_ylim)
+
+# Dump
+folder = 'fig/dump/sd1_paper/'
+os.makedirs(folder, exist_ok=True)
+ws.dump(folder+'ws.pickle')
+thetas.dump(folder+'thetas.pickle')
 
 # Plot
 plt.legend()
