@@ -122,8 +122,9 @@ class TestFrowardBackward(unittest.TestCase):
         w0 = np.arange(10)
         theta0 = np.arange(10)
         n = 1000
+        max_iter = 2
 
-        w, theta = opt.forward_backward(env, w0, theta0, max_iter=2, n=n)
+        w, theta = opt.forward_backward(env, w0, theta0, max_iter, n)
 
-        assert w.shape == w0.shape
-        assert theta.shape == theta0.shape
+        assert w.shape == (max_iter, w0.shape[0])
+        assert theta.shape == (max_iter, theta0.shape[0])
