@@ -102,14 +102,25 @@ def forward_backward(env, w0, theta0, max_iter, n=1000):
 
     """
     w, theta = np.copy(w0), np.copy(theta0)
-    gamma = 1
-    lbd = 1
+    ws, thetas = [], []
+
+    nu = 1e3/env.lbd
+    gamma = 1.99/nu
+    delta = 2 - gamma*nu/2
+    lbd = 0.99*delta
+
+    x = np.linspace(0, 1, n)
 
     for k in range(max_iter):
+        # print(theta)
+        fm = f_m(env, w, theta, n)
+        # print(f'fm {fm}')
         w, theta = forward_backward_step(env, w, theta, gamma, lbd, n)
-
+        ws.append(w)
+        thetas.append(theta)
         subgrad_w, subgrad_theta = subgrad_f_m(env, w, theta, n)
         e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
-        print(f'iter {k}:\t e={e}')
+        gRw, gRtheta = env.grad_R(w, theta, x)
+        print(f'iter {k}: \t e={e:.2e}\tfm={fm:.2e}')
 
-    return w, theta
+    return np.array(ws), np.array(thetas)
