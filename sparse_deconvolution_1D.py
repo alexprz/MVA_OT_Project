@@ -2,6 +2,7 @@
 import numpy as np
 
 from env import Env
+import kernels as ker
 
 
 def spikes_1D(x, w, p):
@@ -24,46 +25,6 @@ def spikes_1D(x, w, p):
     assert len(w.shape) == 1
 
     return np.sum(w[p == x])
-
-
-def dirichlet_kernel(x, n):
-    """Dirichlet kernel of given order (2 pi periodic).
-
-    Args:
-    -----
-        x : float
-        n : int
-            Kernel order.
-
-    Returns:
-    --------
-        float
-
-    """
-    x = np.squeeze(np.array(x))
-    y = np.zeros(x.shape)
-    indeterminate = np.mod(x, 2*np.pi) == 0
-    y[indeterminate] = (2*n + 1)/(2*np.pi)
-    y[~indeterminate] = np.divide(
-        np.sin((n + .5)*x[~indeterminate]),
-        (2*np.pi*np.sin(x[~indeterminate]/2))
-    )
-    return y
-
-
-def dirichlet_kernel_dx(x, n):
-    x = np.squeeze(np.array(x))
-    y = np.zeros(x.shape)
-    indeterminate = np.mod(x, 2*np.pi) == 0
-    y[indeterminate] = 0
-
-    z = x[~indeterminate]
-    a = n + .5
-    b = .5
-    num = a*np.cos(a*z)*np.sin(b*z) - b*np.cos(b*z)*np.sin(a*z)
-    denom = np.power(np.sin(b*z), 2)
-    y[~indeterminate] = np.divide(num, denom)
-    return y
 
 
 def draw_positions_1D(m):
@@ -100,9 +61,9 @@ def y(x, w, theta, psi):
 
     """
     m = w.shape[0]
-    x = np.array(x)
+    x = np.squeeze(np.array(x))
     _y = np.dot(psi(x[:, None] - theta[None, :]), w)
-    assert _y.shape == (x.shape[0], )
+    # assert _y.shape == (x.shape[0], )
     return _y
 
 
@@ -150,6 +111,7 @@ def grad_R(w, theta, x, y, psi, psi_p, lbd):
     m = w.shape[0]
     theta = np.squeeze(theta)
     w = np.squeeze(w)
+    x = np.squeeze(x)
     dx = x[:, None] - theta[None, :]  # (n, m)
     psi_t = psi(dx)  # (n, m)
     z = (y(x) - np.dot(psi_t, w)/m)  # (n,)
@@ -241,8 +203,45 @@ def paper_env(m0):
     # lbd = 0.05
 
     def _g(x): return spikes_1D(x, w, p)  # ground truth
-    def psi(x): return dirichlet_kernel(2*np.pi*x, n=7)  # filter
-    def psi_p(x): return dirichlet_kernel_dx(2*np.pi*x, n=7)  # filter
+    def psi(x): return ker.dirichlet_kernel(2*np.pi*x, n=7)  # filter
+    def psi_p(x): return ker.dirichlet_kernel_dx(2*np.pi*x, n=7)  # filter
+    def _phi(w, theta, x): return phi(w, theta, x, psi)  # weighted translate
+    def V(w, theta): return np.abs(w)  # regularization
+    def _y(x): return y(x, w, p, psi)  # noisy observation
+    def _R(f): return R(f, _y, lbd=lbd)
+    def _grad_R(w, theta, x): return grad_R(w, theta, x, _y, psi, psi_p, lbd=lbd)
+
+    x_min = np.array([0])
+    x_max = np.array([1])
+
+    return Env(R=_R, phi=_phi, V=V, y=_y, g=_g, w=w, p=p,
+               x_min=x_min, x_max=x_max, grad_R=_grad_R, subgrad_V=subgrad_V,
+               psi=psi, psi_p=psi_p, prox_V=prox_V, lbd=lbd)
+
+
+def gaussian_env(m0, sigma):
+    """Create a paper-like environment with a gaussian filter.
+
+    Args:
+    -----
+        m0 : int
+            Number of spikes
+        sigma : float
+            Variance of the gaussian kernel
+
+    Returns:
+    --------
+        Env namedtuple
+    """
+    signs = 2*np.random.binomial(n=1, p=0.5, size=m0) - 1  # weight signs
+    w = signs*np.random.uniform(0.5, 1.5, size=m0)  # weights
+    p = draw_positions_1D(m0)  # positions
+    lbd = 4
+    # lbd = 0.05
+
+    def _g(x): return spikes_1D(x, w, p)  # ground truth
+    def psi(x): return ker.gaussian_kernel(x, sigma=sigma)  # filter
+    def psi_p(x): return ker.gaussian_kernel_dx(x, sigma=sigma)  # filter
     def _phi(w, theta, x): return phi(w, theta, x, psi)  # weighted translate
     def V(w, theta): return np.abs(w)  # regularization
     def _y(x): return y(x, w, p, psi)  # noisy observation
