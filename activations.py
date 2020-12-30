@@ -31,3 +31,33 @@ def sigmoid_d(s):
     """
     sigm = sigmoid(s)
     return sigm*(1 - sigm)
+
+
+def relu(s):
+    """Implement the ReLU activation function.
+
+    Args:
+    -----
+        s : np.array of shape (n,)
+
+    Returns:
+    --------
+        r : np.array of shape (n,)
+
+    """
+    return np.maximum(0, s)
+
+
+def relu_d(s):
+    """Implement the "derivative" of the ReLU activation function.
+
+    Args:
+    -----
+        s : np.array of shape (n,)
+
+    Returns:
+    --------
+        r : np.array of shape (n,)
+
+    """
+    return np.array(s > 0).astype(int)
