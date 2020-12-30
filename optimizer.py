@@ -136,7 +136,8 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0):
         print(f'iter {k}')
 
         # Sample a batch
-        x = np.random.multivariate_normal(0, np.eye(env.d), size=bs)
+        mean, cov = np.zeros(env.d), np.eye(env.d)
+        x = np.random.multivariate_normal(mean, cov, size=bs)
 
         # Forward pass
         y_hat = env.forward(w, theta, x)
