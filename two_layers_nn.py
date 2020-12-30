@@ -174,7 +174,7 @@ def V(w, theta):
     return np.abs(w)*np.linalg.norm(theta, ord=1, axis=1)
 
 
-def paper_env(m0, sigma, loss_name):
+def paper_env(m0, sigma_name, loss_name):
     d = 3
 
     # Generate ground truth
@@ -182,6 +182,7 @@ def paper_env(m0, sigma, loss_name):
     theta_bar = np.random.multivariate_normal(0, np.eye(d-1), size=m0)
 
     loss, loss_d1 = los.get_loss(loss_name)
+    sigma, sigma_d = act.get_sigma(sigma_name)
 
     return env.NNEnv(
         d=d-2,
@@ -191,7 +192,7 @@ def paper_env(m0, sigma, loss_name):
         V=V,
         phi=lambda w, theta, x: phi(w, theta, x, sigma),
         phi_dw=lambda w, theta, x: phi_dw(theta, x, sigma),
-        phi_dtheta=lambda w, theta, x: phi_dtheta(w, theta, x, sigma),
+        phi_dtheta=lambda w, theta, x: phi_dtheta(w, theta, x, sigma_d),
         loss=loss,
         loss_d1=loss_d1,
         forward=lambda w, theta, x: layer2(w, theta, x, sigma),

@@ -2,6 +2,28 @@
 import numpy as np
 
 
+def get_sigma(name):
+    """Retrieve an activation function and its derivative from a name.
+
+    Args:
+    -----
+        name : str
+
+    Returns:
+    --------
+        callable
+            Activation function
+        callable
+            Derivative of the activation function
+
+    """
+    sigmas = {
+        'relu': (relu, relu_d),
+        'sigmoid': (sigmoid, sigmoid_d),
+    }
+    return sigmas[name]
+
+
 def sigmoid(s):
     """Implement the sigmoid activation function.
 
