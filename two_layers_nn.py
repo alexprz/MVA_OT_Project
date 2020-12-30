@@ -18,10 +18,10 @@ def layer1(theta, x, sigma):
 
     Returns:
     --------
-        np.array of shape (m, n)
+        np.array of shape (n, m)
 
     """
-    return sigma(np.inner(theta[:, :-1], x) + theta[:, -1, None])
+    return sigma(np.inner(x, theta[:, :-1]) + theta[None, -1, :])
 
 
 def layer2(w, theta, x, sigma):
@@ -56,10 +56,10 @@ def phi(w, theta, x, sigma):
 
     Returns:
     --------
-        np.array of shape (m, n)
+        np.array of shape (n, m)
 
     """
-    return w[:, None]*layer1(theta, x, sigma)  # (m, n)
+    return w[None, :]*layer1(theta, x, sigma)  # (n, m)
 
 
 def phi_dw(w, theta, x, sigma):
@@ -75,10 +75,10 @@ def phi_dw(w, theta, x, sigma):
 
     Returns:
     --------
-        np.array of shape (m, n)
+        np.array of shape (n, m)
 
     """
-    return layer1(theta, x, sigma)  # (m, n)
+    return layer1(theta, x, sigma)  # (n, m)
 
 
 def phi_dtheta1(w, theta, x, sigma_d):
@@ -94,10 +94,10 @@ def phi_dtheta1(w, theta, x, sigma_d):
 
     Returns:
     --------
-        np.array of shape (m, d, n)
+        np.array of shape (n, m, d-1)
 
     """
-    return w[:, None, None]*x[None, :, :]*layer1(theta, x, sigma_d)[:, None, :]
+    return w[None, :, None]*x[:, None, :]*layer1(theta, x, sigma_d)[:, :, None]
 
 
 def phi_dtheta2(w, theta, x, sigma_d):
@@ -113,10 +113,10 @@ def phi_dtheta2(w, theta, x, sigma_d):
 
     Returns:
     --------
-        np.array of shape (m, n)
+        np.array of shape (n, m)
 
     """
-    return w[:, None]*layer1(theta, x, sigma_d)  # (m, n)
+    return w[None, :]*layer1(theta, x, sigma_d)  # (n, m)
 
 
 def y(w, theta, x, sigma):
