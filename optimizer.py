@@ -130,6 +130,7 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
 
 def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
     w, theta = np.copy(w0), np.copy(theta0)
+    ws, thetas = [np.copy(w)], [np.copy(theta)]
     m = w.shape[0]
 
     for k in range(n_iter):
@@ -153,10 +154,13 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
         w -= gamma*grad_w
         theta -= gamma*grad_theta
 
+        ws.append(np.copy(w))
+        thetas.append(np.copy(theta))
+
         if print_every is not None and k % print_every == 0:
             e = np.linalg.norm(grad_theta) + np.linalg.norm(grad_w)
             print(f'iter {k+1}: \t ∇={e:.2e}')
 
-    return w, theta
+    return np.array(ws), np.array(thetas)
 
 
