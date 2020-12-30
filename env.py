@@ -21,14 +21,15 @@ Env = namedtuple('Env', [
 ])
 
 NNEnv = namedtuple('NNEnv', [
+    'd'
     'phi',
     'phi_dw',
-    'phi_dtheta1',
-    'phi_dtheta2',
+    'phi_dtheta',
     'V',
     'y',
     'w_bar',
     'theta_bar',
     'loss',
     'loss_d1',
+    'forward',
 ])

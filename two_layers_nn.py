@@ -62,12 +62,11 @@ def phi(w, theta, x, sigma):
     return w[None, :]*layer1(theta, x, sigma)  # (n, m)
 
 
-def phi_dw(w, theta, x, sigma):
+def phi_dw(theta, x, sigma):
     """Implement the derivative of the phi function wrt w.
 
     Args:
     -----
-        w : np.array of shape (m,)
         theta : np.array of shape (m, d)
         x : np.array of shape (n, d-1)
         sigma : callable
@@ -119,6 +118,27 @@ def phi_dtheta2(w, theta, x, sigma_d):
     return w[None, :]*layer1(theta, x, sigma_d)  # (n, m)
 
 
+def phi_dtheta(w, theta, x, sigma_d):
+    """Implement the derivative of the phi function wrt theta.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+        x : np.array of shape (n, d-1)
+        sigma_d : callable
+            Derivative of the activation function
+
+    Returns:
+    --------
+        np.array of shape (n, m)
+
+    """
+    d1 = phi_dtheta1(w, theta, x, sigma_d)
+    d2 = phi_dtheta2(w, theta, x, sigma_d)
+    return np.concatenate((d1, d2), axis=0)
+
+
 def y(w, theta, x, sigma):
     """Implement the second layer of the paper.
 
@@ -164,14 +184,15 @@ def paper_env(m0, sigma, loss_name):
     loss, loss_d1 = los.get_loss(loss_name)
 
     return env.NNEnv(
+        d=d-2,
         w_bar=w_bar,
         theta_bar=theta_bar,
         y=lambda x: y(w_bar, theta_bar, x, sigma),
         V=V,
         phi=lambda w, theta, x: phi(w, theta, x, sigma),
-        phi_dw=lambda w, theta, x: phi_dw(w, theta, x, sigma),
-        phi_dtheta1=lambda w, theta, x: phi_dtheta1(w, theta, x, sigma),
-        phi_dtheta2=lambda w, theta, x: phi_dtheta2(w, theta, x, sigma),
+        phi_dw=lambda w, theta, x: phi_dw(theta, x, sigma),
+        phi_dtheta=lambda w, theta, x: phi_dtheta(w, theta, x, sigma),
         loss=loss,
         loss_d1=loss_d1,
+        forward=lambda w, theta, x: layer2(w, theta, x, sigma),
     )
