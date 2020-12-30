@@ -138,6 +138,22 @@ def y(w, theta, x, sigma):
     return layer2(w, theta, x, sigma)
 
 
+def V(w, theta):
+    """Implement the second layer of the paper.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+
+    Returns:
+    --------
+        np.array of shape (m,)
+
+    """
+    return np.abs(w)*np.linalg.norm(theta, ord=1, axis=1)
+
+
 def paper_env(m0, sigma, loss):
     d = 3
 
@@ -147,4 +163,5 @@ def paper_env(m0, sigma, loss):
 
     return env.Env(
         y=lambda x: y(w_bar, theta_bar, x, sigma),
+        V=V,
     )
