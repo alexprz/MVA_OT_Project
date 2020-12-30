@@ -24,6 +24,25 @@ def layer1(theta, x, sigma):
     return sigma(np.inner(theta[:, :-1], x) + theta[:, -1, None])
 
 
+def layer2(w, theta, x, sigma):
+    """Implement the second layer of the paper.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+        x : np.array of shape (n, d-1)
+        sigma : callable
+            Activation function
+
+    Returns:
+    --------
+        np.array of shape (n,)
+
+    """
+    return np.mean(phi(w, theta, x, sigma), axis=0)
+
+
 def phi(w, theta, x, sigma):
     """Implement the phi function of the paper.
 
@@ -98,3 +117,34 @@ def phi_dtheta2(w, theta, x, sigma_d):
 
     """
     return w[:, None]*layer1(theta, x, sigma_d)  # (m, n)
+
+
+def y(w, theta, x, sigma):
+    """Implement the second layer of the paper.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+        x : np.array of shape (n, d-1)
+        sigma : callable
+            Activation function
+
+    Returns:
+    --------
+        np.array of shape (n,)
+
+    """
+    return layer2(w, theta, x, sigma)
+
+
+def paper_env(m0, sigma, loss):
+    d = 3
+
+    # Generate ground truth
+    w_bar = np.random.normal(0, 1, size=m0)
+    theta_bar = np.random.multivariate_normal(0, np.eye(d-1), size=m0)
+
+    return env.Env(
+        y=lambda x: y(w_bar, theta_bar, x, sigma),
+    )
