@@ -10,7 +10,7 @@ Env = namedtuple('Env', [
     'g',
     'w',
     'p',
-    'x_min,',
+    'x_min',
     'x_max',
     'grad_R',
     'psi',
@@ -21,7 +21,7 @@ Env = namedtuple('Env', [
 ])
 
 NNEnv = namedtuple('NNEnv', [
-    'd'
+    'd',
     'phi',
     'phi_dw',
     'phi_dtheta',
