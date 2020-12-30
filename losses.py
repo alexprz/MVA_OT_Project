@@ -20,14 +20,14 @@ def get_loss(name):
 
     """
     losses = {
-        'quadratic': (quadratic, quadratic_d1),
-        'sigmoid': (sigmoid, sigmoid_d1),
+        'squared': (squared, squared_d1),
+        'logistic': (logistic, logistic_d1),
     }
     return losses[name]
 
 
-def quadratic(y1, y2):
-    """Implement the quadratic loss.
+def squared(y1, y2):
+    """Implement the squared loss.
 
     Args:
     -----
@@ -42,8 +42,8 @@ def quadratic(y1, y2):
     return np.power(y1 - y2, 2)/2
 
 
-def quadratic_d1(y1, y2):
-    """Implement the first derivative of the quadratic loss.
+def squared_d1(y1, y2):
+    """Implement the first derivative of the squared loss.
 
     Args:
     -----
@@ -58,7 +58,7 @@ def quadratic_d1(y1, y2):
     return y1 - y2
 
 
-def sigmoid(y1, y2):
+def logistic(y1, y2):
     """Implement the logistic loss.
 
     Args:
@@ -74,7 +74,7 @@ def sigmoid(y1, y2):
     return -np.log(act.sigmoid(y1*y2))/np.log(2)
 
 
-def sigmoid_d1(y1, y2):
+def logistic_d1(y1, y2):
     """Implement the first derivative of the logistic loss.
 
     Args:
