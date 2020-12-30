@@ -4,6 +4,28 @@ import numpy as np
 import activations as act
 
 
+def get_loss(name):
+    """Retrieve a loss function and its derivative from a name.
+
+    Args:
+    -----
+        name : str
+
+    Returns:
+    --------
+        callable
+            Loss function
+        callable
+            Derivative of the loss function
+
+    """
+    losses = {
+        'quadratic': (quadratic, quadratic_d1),
+        'sigmoid': (sigmoid, sigmoid_d1),
+    }
+    return losses[name]
+
+
 def quadratic(y1, y2):
     """Implement the quadratic loss.
 
