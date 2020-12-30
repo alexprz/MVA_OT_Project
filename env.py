@@ -32,4 +32,6 @@ NNEnv = namedtuple('NNEnv', [
     'loss',
     'loss_d1',
     'forward',
+    'sigma',
+    'sigma_d',
 ])
