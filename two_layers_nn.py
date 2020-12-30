@@ -21,7 +21,7 @@ def layer1(theta, x, sigma):
         np.array of shape (n, m)
 
     """
-    return sigma(np.inner(x, theta[:, :-1]) + theta[None, -1, :])
+    return sigma(np.inner(x, theta[:, :-1]) + theta[None, :, -1])
 
 
 def layer2(w, theta, x, sigma):
@@ -40,7 +40,7 @@ def layer2(w, theta, x, sigma):
         np.array of shape (n,)
 
     """
-    return np.mean(phi(w, theta, x, sigma), axis=0)
+    return np.mean(phi(w, theta, x, sigma), axis=1)
 
 
 def phi(w, theta, x, sigma):
@@ -197,4 +197,6 @@ def paper_env(m0, sigma_name, loss_name):
         loss=loss,
         loss_d1=loss_d1,
         forward=lambda w, theta, x: layer2(w, theta, x, sigma),
+        sigma=sigma,
+        sigma_d=sigma_d,
     )
