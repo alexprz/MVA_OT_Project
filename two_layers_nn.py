@@ -179,7 +179,8 @@ def paper_env(m0, sigma_name, loss_name):
 
     # Generate ground truth
     w_bar = np.random.normal(0, 1, size=m0)
-    theta_bar = np.random.multivariate_normal(0, np.eye(d-1), size=m0)
+    mean, cov = np.zeros(d-1), np.eye(d-1)
+    theta_bar = np.random.multivariate_normal(mean, cov, size=m0)
 
     loss, loss_d1 = los.get_loss(loss_name)
     sigma, sigma_d = act.get_sigma(sigma_name)
