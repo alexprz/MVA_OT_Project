@@ -135,8 +135,8 @@ def phi_dtheta(w, theta, x, sigma_d):
 
     """
     d1 = phi_dtheta1(w, theta, x, sigma_d)
-    d2 = phi_dtheta2(w, theta, x, sigma_d)
-    return np.concatenate((d1, d2), axis=0)
+    d2 = phi_dtheta2(w, theta, x, sigma_d)[:, :, None]
+    return np.concatenate((d1, d2), axis=2)
 
 
 def y(w, theta, x, sigma):

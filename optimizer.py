@@ -141,10 +141,14 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0):
 
         # Forward pass
         y_hat = env.forward(w, theta, x)
-        loss_d = env.loss_d(y_hat, env.y(x))
+        loss_d = env.loss_d1(y_hat, env.y(x))
 
         grad_w = env.phi_dw(w, theta, x)*loss_d[:, None]/m
         grad_theta = env.phi_dtheta(w, theta, x)*loss_d[:, None, None]/m
+
+        # Approx the expectancy by Monte Carlo
+        grad_w = grad_w.mean(axis=0)
+        grad_theta = grad_theta.mean(axis=0)
 
         gamma = gamma0/np.power(k+1, .75)
 
