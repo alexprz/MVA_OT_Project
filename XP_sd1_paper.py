@@ -21,6 +21,24 @@ np.random.seed(0)
 m0 = 5
 env = sd1.paper_env(m0)
 
+# Initialize the particles
+m = 20  # Number of particles
+w0 = np.zeros(m)  # Weights
+theta0 = np.arange(m)/m  # Positions (uniformly spaced)
+n = 50  # Discretization (for integral computation)
+max_iter = 1000000
+
+# Apply the forward backward algorithm
+ws, thetas = opt.forward_backward(env, w0, theta0, max_iter=max_iter, n=n,
+                                  print_every=100)
+
+# Dump
+folder = 'fig/dump/sd1_paper/'
+os.makedirs(folder, exist_ok=True)
+ws.dump(folder+'ws.pickle')
+thetas.dump(folder+'thetas.pickle')
+
+# Plot
 ax = plt.gca()
 
 # Print the optimal positions
@@ -31,19 +49,8 @@ for i, p in enumerate(env.p):
     ax.axvline(p, ymin=ymin, ymax=ymax, color='black', linestyle='--',
                linewidth=1, label=label)
 
-# Initialize the particles
-m = 20  # Number of particles
-w0 = np.zeros(m)  # Weights
-theta0 = np.arange(m)/m  # Positions (uniformly spaced)
-n = 50  # Discretization (for integral computation)
-max_iter = 1000000
-
 # Plot initial particles
 plt.scatter(theta0, w0, color='blue', marker='.')
-
-# Apply the forward backward algorithm
-ws, thetas = opt.forward_backward(env, w0, theta0, max_iter=max_iter, n=n,
-                                  print_every=100)
 
 # Plot the final particles
 plt.scatter(thetas[-1, :], ws[-1, :], color='red', marker='.', label='Particle')
@@ -57,12 +64,6 @@ for k in range(m):
 y_min, y_max = ax.get_ylim()
 max_ylim = max(abs(y_min), abs(y_max))
 ax.set_ylim(-max_ylim, max_ylim)
-
-# Dump
-folder = 'fig/dump/sd1_paper/'
-os.makedirs(folder, exist_ok=True)
-ws.dump(folder+'ws.pickle')
-thetas.dump(folder+'thetas.pickle')
 
 # Plot
 plt.legend()
