@@ -126,3 +126,30 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
             print(f'iter {k}: \t e={e:.2e} \t fm={fm:.2e}')
 
     return np.array(ws), np.array(thetas)
+
+
+def SGD(env, w0, theta0, bs, n_iter, gamma0):
+    w, theta = np.copy(w0), np.copy(theta0)
+    m = w.shape[0]
+
+    for k in range(n_iter):
+        print(f'iter {k}')
+
+        # Sample a batch
+        x = np.random.multivariate_normal(0, np.eye(env.d), size=bs)
+
+        # Forward pass
+        y_hat = env.forward(w, theta, x)
+        loss_d = env.loss_d(y_hat, env.y(x))
+
+        grad_w = env.phi_dw(w, theta, x)*loss_d[:, None]/m
+        grad_theta = env.phi_dtheta(w, theta, x)*loss_d[:, None, None]/m
+
+        gamma = gamma0/np.power(k+1, .75)
+
+        w -= gamma*grad_w
+        theta -= gamma*grad_theta
+
+    return w, theta
+
+
