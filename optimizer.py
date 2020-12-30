@@ -106,7 +106,8 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
     ws, thetas = [], []
 
     # Parameters of the algorithm
-    nu = 5e2/env.lbd
+    nu = 8e3/env.lbd  # gaussian
+    # nu = 5e2/env.lbd  # paper
     gamma = 1.99/nu
     delta = 2 - gamma*nu/2
     lbd = 0.99*delta
@@ -117,11 +118,11 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
         thetas.append(theta)
 
         # Check subgradient and objective value
-        subgrad_w, subgrad_theta = subgrad_f_m(env, w, theta, n)
-        e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
-        fm = f_m(env, w, theta, n)
-
         if print_every is not None and k % print_every == 0:
+            subgrad_w, subgrad_theta = subgrad_f_m(env, w, theta, n)
+            e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
+            fm = f_m(env, w, theta, n)
+
             print(f'iter {k}: \t e={e:.2e} \t fm={fm:.2e}')
 
     return np.array(ws), np.array(thetas)
