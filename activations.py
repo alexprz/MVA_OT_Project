@@ -39,7 +39,7 @@ class Sigmoid(BaseActivation):
             sigma : np.array of shape (n,)
 
         """
-        return np.divide(1, 1 + np.exp(-s))
+        return np.power(1 + np.exp(-s), -1)
 
     @staticmethod
     def derivative(s):
