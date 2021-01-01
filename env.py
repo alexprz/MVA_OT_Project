@@ -26,6 +26,8 @@ NNEnv = namedtuple('NNEnv', [
     'phi_dw',
     'phi_dtheta',
     'V',
+    'V_dw',
+    'V_dtheta',
     'y',
     'w_bar',
     'theta_bar',

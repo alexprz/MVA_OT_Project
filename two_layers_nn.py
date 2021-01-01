@@ -158,6 +158,22 @@ def y(w, theta, x, sigma):
     return layer2(w, theta, x, sigma)
 
 
+# def V(w, theta):
+#     """Implement the second layer of the paper.
+
+#     Args:
+#     -----
+#         w : np.array of shape (m,)
+#         theta : np.array of shape (m, d)
+
+#     Returns:
+#     --------
+#         np.array of shape (m,)
+
+#     """
+#     return np.abs(w)*np.linalg.norm(theta, ord=1, axis=1)
+
+
 def V(w, theta):
     """Implement the second layer of the paper.
 
@@ -171,7 +187,39 @@ def V(w, theta):
         np.array of shape (m,)
 
     """
-    return np.abs(w)*np.linalg.norm(theta, ord=1, axis=1)
+    return np.abs(w)
+
+
+def V_dw(w, theta):
+    """Implement the second layer of the paper.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+
+    Returns:
+    --------
+        np.array of shape (m,)
+
+    """
+    return np.sign(w)
+
+
+def V_dtheta(w, theta):
+    """Implement the second layer of the paper.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+
+    Returns:
+    --------
+        np.array of shape (m,)
+
+    """
+    return np.zeros_like(theta)
 
 
 def paper_env(m0, sigma_name, loss_name):
@@ -191,6 +239,8 @@ def paper_env(m0, sigma_name, loss_name):
         theta_bar=theta_bar,
         y=lambda x: y(w_bar, theta_bar, x, sigma),
         V=V,
+        V_dw=V_dw,
+        V_dtheta=V_dtheta,
         phi=lambda w, theta, x: phi(w, theta, x, sigma),
         phi_dw=lambda w, theta, x: phi_dw(theta, x, sigma),
         phi_dtheta=lambda w, theta, x: phi_dtheta(w, theta, x, sigma_d),
