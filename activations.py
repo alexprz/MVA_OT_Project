@@ -1,5 +1,6 @@
 """Implement activation functions."""
 import numpy as np
+from abc import ABC, abstractmethod
 
 
 def get_activation(name):
@@ -24,12 +25,28 @@ def get_activation(name):
     return activations[name]
 
 
-class Sigmoid():
-    """Implement the sigmoid activation function."""
+class BaseActivation(ABC):
+    """Abstract class for activation classes."""
 
     def __call__(self, s):
         """Shortcut to call the activation function."""
         return self.activation(s)
+
+    @staticmethod
+    @abstractmethod
+    def activation(s):
+        """Implement the activation function."""
+        return
+
+    @staticmethod
+    @abstractmethod
+    def derivative(s):
+        """Implement the derivative of the activation function."""
+        return
+
+
+class Sigmoid(BaseActivation):
+    """Implement the sigmoid activation function."""
 
     @staticmethod
     def activation(s):
@@ -63,12 +80,8 @@ class Sigmoid():
         return sigmoid*(1 - sigmoid)
 
 
-class ReLU():
+class ReLU(BaseActivation):
     """Implement the ReLU activation function."""
-
-    def __call__(self, s):
-        """Shortcut to call the activation function."""
-        return self.activation(s)
 
     @staticmethod
     def activation(s):

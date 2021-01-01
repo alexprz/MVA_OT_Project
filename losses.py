@@ -1,5 +1,6 @@
 """Implement the loss functions for the NN example."""
 import numpy as np
+from abc import ABC, abstractmethod
 
 import activations as act
 
@@ -26,12 +27,28 @@ def get_loss(name):
     return losses[name]
 
 
-class Squared():
-    """Implement the squared loss function."""
+class BaseLoss(ABC):
+    """Abstract class for loss classes."""
 
     def __call__(self, y1, y2):
         """Shortcut to call the loss function."""
         return self.loss(y1, y2)
+
+    @staticmethod
+    @abstractmethod
+    def loss(y1, y2):
+        """Implement the loss function."""
+        return
+
+    @staticmethod
+    @abstractmethod
+    def derivative(y1, y2):
+        """Implement the derivative of the loss function."""
+        return
+
+
+class Squared(BaseLoss):
+    """Implement the squared loss function."""
 
     @staticmethod
     def loss(y1, y2):
@@ -66,12 +83,8 @@ class Squared():
         return y1 - y2
 
 
-class Logistic():
+class Logistic(BaseLoss):
     """Implement the logistic loss function."""
-
-    def __call__(self, y1, y2):
-        """Shortcut to call the loss function."""
-        return self.loss(y1, y2)
 
     @staticmethod
     def loss(y1, y2):
