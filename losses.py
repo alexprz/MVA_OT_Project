@@ -20,71 +20,87 @@ def get_loss(name):
 
     """
     losses = {
-        'squared': (squared, squared_d1),
-        'logistic': (logistic, logistic_d1),
+        'squared': Squared(),
+        'logistic': Logistic(),
     }
     return losses[name]
 
 
-def squared(y1, y2):
-    """Implement the squared loss.
+class Squared():
+    """Implement the squared loss function."""
 
-    Args:
-    -----
-        y1 : np.array of shape (n,)
-        y2 : np.array of shape (n,)
+    def __call__(self, y1, y2):
+        """Shortcut to call the loss function."""
+        return self.loss(y1, y2)
 
-    Returns:
-    --------
-        l : np.array of shape (n,)
+    @staticmethod
+    def loss(y1, y2):
+        """Implement the squared loss.
 
-    """
-    return np.power(y1 - y2, 2)/2
+        Args:
+        -----
+            y1 : np.array of shape (n,)
+            y2 : np.array of shape (n,)
 
+        Returns:
+        --------
+            l : np.array of shape (n,)
 
-def squared_d1(y1, y2):
-    """Implement the first derivative of the squared loss.
+        """
+        return np.power(y1 - y2, 2)/2
 
-    Args:
-    -----
-        y1 : np.array of shape (n,)
-        y2 : np.array of shape (n,)
+    @staticmethod
+    def derivative(y1, y2):
+        """Implement the first derivative of the squared loss.
 
-    Returns:
-    --------
-        l : np.array of shape (n,)
+        Args:
+        -----
+            y1 : np.array of shape (n,)
+            y2 : np.array of shape (n,)
 
-    """
-    return y1 - y2
+        Returns:
+        --------
+            l : np.array of shape (n,)
 
-
-def logistic(y1, y2):
-    """Implement the logistic loss.
-
-    Args:
-    -----
-        y1 : np.array of shape (n,)
-        y2 : np.array of shape (n,)
-
-    Returns:
-    --------
-        l : np.array of shape (n,)
-
-    """
-    return -np.log(act.sigmoid(y1*y2))/np.log(2)
+        """
+        return y1 - y2
 
 
-def logistic_d1(y1, y2):
-    """Implement the first derivative of the logistic loss.
+class Logistic():
+    """Implement the logistic loss function."""
 
-    Args:
-    -----
-        y1 : np.array of shape (n,)
-        y2 : np.array of shape (n,)
+    def __call__(self, y1, y2):
+        """Shortcut to call the loss function."""
+        return self.loss(y1, y2)
 
-    Returns:
-    --------
-        l : np.array of shape (n,)
+    @staticmethod
+    def loss(y1, y2):
+        """Implement the logistic loss.
 
-    """
-    return np.divide(y2, act.sigmoid_d(y1*y2))/np.log(2)
+        Args:
+        -----
+            y1 : np.array of shape (n,)
+            y2 : np.array of shape (n,)
+
+        Returns:
+        --------
+            l : np.array of shape (n,)
+
+        """
+        return -np.log(act.sigmoid(y1*y2))/np.log(2)
+
+    @staticmethod
+    def derivative(y1, y2):
+        """Implement the first derivative of the logistic loss.
+
+        Args:
+        -----
+            y1 : np.array of shape (n,)
+            y2 : np.array of shape (n,)
+
+        Returns:
+        --------
+            l : np.array of shape (n,)
+
+        """
+        return np.divide(y2, act.sigmoid_d(y1*y2))/np.log(2)
