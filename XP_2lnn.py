@@ -2,14 +2,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import two_layers_nn as tln
+import two_layer_nn as tln
 import optimizer as opt
+import activations as act
+import losses
 
 
 np.random.seed(0)
 m0 = 4
-NNenv = tln.paper_env(m0, sigma_name='relu', loss_name='squared')
+tln_env = tln.paper_env(m0, act.ReLU(), losses.Squared())
 
+# Initialize the particle flow
 m = 10
 eps = 1e-1
 w0 = eps*np.ones(m)
@@ -20,15 +23,15 @@ theta0 = np.concatenate((np.real(roots), np.imag(roots)), axis=1)
 bs = 100
 n_iter = 1000
 gamma0 = 1e-1
-ws, thetas, fms = opt.SGD(NNenv, w0, theta0, bs, n_iter, gamma0, print_every=10)
+ws, thetas, fms = opt.SGD(tln_env, w0, theta0, bs, n_iter, gamma0, print_every=10)
 
 w_final, theta_final = ws[-1, ...], thetas[-1, ...]
 
 
 # Plot loss evolution
-mean, cov = np.zeros(NNenv.d), np.eye(NNenv.d)
+mean, cov = np.zeros(tln_env.d), np.eye(tln_env.d)
 x = np.random.multivariate_normal(mean, cov, size=1000)
-fm_bar = tln.f_m(NNenv, NNenv.w_bar, NNenv.theta_bar, x)
+fm_bar = tln_env.fm(tln_env.w_bar, tln_env.theta_bar, x)
 
 fig = plt.figure(figsize=(16, 6))
 ax = fig.add_subplot(121)
@@ -42,7 +45,7 @@ ax.legend()
 ax2 = fig.add_subplot(122)
 xx = np.linspace(0, 2, 2)
 
-theta_bar = NNenv.theta_bar
+theta_bar = tln_env.theta_bar
 XX = np.sign(theta_bar[:, 0])[:, None]*xx[None, :]
 YY = np.divide(theta_bar[:, 1], theta_bar[:, 0])[:, None]*xx[None, :]
 XX = np.clip(XX, -2, 2)
