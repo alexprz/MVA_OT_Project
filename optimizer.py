@@ -106,11 +106,12 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
     ws, thetas = [], []
 
     # Parameters of the algorithm
-    nu = 8e3/env.lbd  # gaussian
+    # nu = 8e3/env.lbd  # gaussian
+    nu = 1/env.lbd
     # nu = 5e2/env.lbd  # paper
-    gamma = 1.99/nu
+    gamma = 1/nu
     delta = 2 - gamma*nu/2
-    lbd = 0.99*delta
+    lbd = 0.01*delta
 
     for k in range(max_iter):
         w, theta = forward_backward_step(env, w, theta, gamma, lbd, n)
@@ -140,10 +141,11 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
 
         # Forward pass
         y_hat = env.forward(w, theta, x)
+        loss = env.loss(y_hat, env.y(x))
         loss_d = env.loss_d1(y_hat, env.y(x))
 
-        grad_w = env.phi_dw(w, theta, x)*loss_d[:, None]/m
-        grad_theta = env.phi_dtheta(w, theta, x)*loss_d[:, None, None]/m
+        grad_w = env.phi_dw(w, theta, x)*loss_d[:, None]/m + env.V_dw(w, theta)/m
+        grad_theta = env.phi_dtheta(w, theta, x)*loss_d[:, None, None]/m + env.V_dtheta(w, theta)/m
 
         # Approx the expectancy by Monte Carlo
         grad_w = grad_w.mean(axis=0)
@@ -151,15 +153,16 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
 
         gamma = gamma0/np.power(k+1, .75)
 
-        w -= gamma*grad_w
-        theta -= gamma*grad_theta
+        w -= m*gamma*grad_w
+        theta -= m*gamma*grad_theta
 
         ws.append(np.copy(w))
         thetas.append(np.copy(theta))
 
         if print_every is not None and k % print_every == 0:
-            e = np.linalg.norm(grad_theta) + np.linalg.norm(grad_w)
-            print(f'iter {k+1}: \t ∇={e:.2e}')
+            e_w = np.linalg.norm(grad_w)
+            e_theta = np.linalg.norm(grad_theta)
+            print(f'iter {k+1}: \t ∇w={e_w:.2e} \t ∇θ={e_theta:.2e} \t loss={loss.mean():.2e} \t loss_d={loss_d.mean():.2e}')
 
     return np.array(ws), np.array(thetas)
 
