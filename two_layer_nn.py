@@ -8,7 +8,7 @@ import activations
 class TwoLayerNN():
     """Implement functions for the NN example of the paper."""
 
-    def __init__(self, activation, loss, w_bar, theta_bar):
+    def __init__(self, activation, loss, w_bar, theta_bar, beta=1):
         """Init.
 
         Args:
@@ -30,6 +30,8 @@ class TwoLayerNN():
 
         self.w_bar = w_bar
         self.theta_bar = theta_bar
+
+        self.beta = beta
 
     @property
     def d(self):
@@ -247,8 +249,7 @@ class TwoLayerNN():
         """
         return np.zeros_like(theta)
 
-    @staticmethod
-    def Vm(w, theta):
+    def Vm(self, w, theta):
         """Implement the second layer of the paper.
 
         Args:
@@ -261,10 +262,9 @@ class TwoLayerNN():
             float
 
         """
-        return TwoLayerNN.V(w, theta).mean().item()
+        return self.beta*TwoLayerNN.V(w, theta).mean().item()
 
-    @staticmethod
-    def subgrad_Vm(w, theta):
+    def subgrad_Vm(self, w, theta):
         """Return a subgradient of V.
 
         Args:
@@ -279,8 +279,8 @@ class TwoLayerNN():
 
         """
         m = w.shape[0]
-        subgrad_w = TwoLayerNN.V_dw(w, theta)
-        subgrad_theta = TwoLayerNN.V_dtheta(w, theta)
+        subgrad_w = self.beta*TwoLayerNN.V_dw(w, theta)
+        subgrad_theta = self.beta*TwoLayerNN.V_dtheta(w, theta)
 
         return subgrad_w/m, subgrad_theta/m
 
@@ -364,7 +364,7 @@ class TwoLayerNN():
         return grad_w_r + grad_w_v, grad_theta_r + grad_theta_v
 
 
-def paper_env(m0, activation, loss):
+def paper_env(m0, activation, loss, beta):
     """Create the environment of the paper.
 
     Args:
@@ -386,4 +386,4 @@ def paper_env(m0, activation, loss):
     mean, cov = np.zeros(d-1), np.eye(d-1)
     theta_bar = np.random.multivariate_normal(mean, cov, size=m0)
 
-    return TwoLayerNN(activation, loss, w_bar, theta_bar)
+    return TwoLayerNN(activation, loss, w_bar, theta_bar, beta)
