@@ -4,7 +4,7 @@ import time
 import numpy as np
 from numpy.linalg import norm
 import matplotlib.pyplot as plt
-from matplotlib import cm, colorbar
+from matplotlib import cm
 
 import two_layer_nn as tln
 import optimizer as opt
@@ -37,11 +37,11 @@ def lineplot(w, theta, ax, **kwargs):
 
 np.random.seed(0)
 m0 = 4
-tln_env = tln.paper_env(m0, act.Sigmoid(), losses.Squared(), beta=2.5e-2)
+tln_env = tln.paper_env(m0, act.ReLU(), losses.Squared(), beta=1)
 
 # Initialize the particle flow
 m = 10
-eps = 1e0
+eps = 1e-1
 w0 = eps*np.ones(m)
 roots = np.array([np.exp(2*np.pi*1j*k/m) for k in range(m)])[:, None]
 theta0 = np.concatenate((np.real(roots), np.imag(roots)), axis=1)
@@ -55,8 +55,8 @@ w_bar, theta_bar = tln_env.w_bar, tln_env.theta_bar
 
 # Optimize the particle flow
 bs = 10
-n_iter = 10000
-gamma0 = 1e-1
+n_iter = 1000
+gamma0 = 1e-2
 ws, thetas, fms, norm_grad_fms, Rms, Vms, norm_grad_Rms, norm_grad_Vms = opt.SGD(tln_env, w0, theta0, bs, n_iter, gamma0, print_every=10)
 
 w_final, theta_final = ws[-1, ...], thetas[-1, ...]
@@ -128,7 +128,7 @@ ax.set_title(r'Evolution of $\|\nabla_{(w,\theta)}F_m\|_2$')
 ax.legend()
 
 # Draw some input samples
-mean, cov = np.zeros(tln_env.d), np.eye(tln_env.d)
+mean, cov = np.zeros(tln_env.d), 1e4*np.eye(tln_env.d)
 x = np.random.multivariate_normal(mean, cov, size=100)
 
 # Plot label of initial network

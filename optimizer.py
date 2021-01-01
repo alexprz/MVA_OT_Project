@@ -94,13 +94,14 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
     norm_grad_Rms, norm_grad_Vms = [], []
     m = w.shape[0]
 
+    # Sample a batch
+    mean, cov = np.zeros(env.d), 1e4*np.eye(env.d)
+    x = np.random.multivariate_normal(mean, cov, size=bs)
+
     for k in range(n_iter):
         # Adjust step size
-        gamma = gamma0/np.power(k+1, .75)
+        gamma = gamma0#/np.power(k+1, .51)
 
-        # Sample a batch
-        mean, cov = np.zeros(env.d), np.eye(env.d)
-        x = np.random.multivariate_normal(mean, cov, size=bs)
 
         # Compute the gradient over the batch
         grad_w, grad_theta = env.grad_fm(w, theta, x)
@@ -130,7 +131,7 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
         norm_grad_fms.append(e)
 
         if print_every is not None and (k == 0 or (k+1) % print_every == 0):
-            print(f'iter {k+1}: \t ∇w={e_w:.2e} \t ∇θ={e_theta:.2e} \t fm={fm:.2e} \t ∇fm={e:.2e}')
+            print(f'iter {k+1}: \t |∇w|={e_w:.2e} \t |∇θ|={e_theta:.2e} \t fm={fm:.2e} \t |∇fm|={e:.2e}')
 
     ws = np.array(ws)
     thetas = np.array(thetas)
@@ -141,5 +142,3 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
     norm_grad_Rms = np.array(norm_grad_Rms)
     norm_grad_Vms = np.array(norm_grad_Vms)
     return ws, thetas, fms, norm_grad_fms, Rms, Vms, norm_grad_Rms, norm_grad_Vms
-
-

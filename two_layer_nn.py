@@ -33,6 +33,11 @@ class TwoLayerNN():
 
         self.beta = beta
 
+        # Estimate the mean value of the ground truth y_bar
+        mean, cov = np.zeros(self.d), np.eye(self.d)
+        x = np.random.multivariate_normal(mean, cov, size=1000)
+        self.y_bar_mean = self.layer2(self.w_bar, self.theta_bar, x).mean()
+
     @property
     def d(self):
         """Dimension of the input samples."""
@@ -157,6 +162,12 @@ class TwoLayerNN():
         d2 = self._phi_dtheta2(w, theta, x)[:, :, None]
         return np.concatenate((d1, d2), axis=2)
 
+    def to_class(self, y):
+        y_class = np.copy(y)
+        y_class[y >= self.y_bar_mean] = 1
+        y_class[y < self.y_bar_mean] = -1
+        return y_class
+
     def y(self, w, theta, x):
         """Implement the output function.
 
@@ -171,7 +182,7 @@ class TwoLayerNN():
             np.array of shape (n,)
 
         """
-        return self.layer2(w, theta, x)
+        return self.to_class(self.layer2(w, theta, x))
 
     def y_bar(self, x):
         """Implement the optimal output function.
@@ -321,7 +332,7 @@ def paper_env(m0, activation, loss, beta):
     d = 3
 
     # Generate ground truth
-    w_bar = 1e-1*np.random.normal(0, 1, size=m0)
+    w_bar = np.random.normal(0, 1, size=m0)
     mean, cov = np.zeros(d-1), np.eye(d-1)
     theta_bar = np.random.multivariate_normal(mean, cov, size=m0)
 
