@@ -10,27 +10,33 @@ np.random.seed(0)
 m0 = 4
 NNenv = tln.paper_env(m0, sigma_name='relu', loss_name='squared')
 
-m = 20
+m = 100
 eps = 1e-1
 w0 = eps*np.ones(m)
 roots = np.array([np.exp(2*np.pi*1j*k/m) for k in range(m)])[:, None]
 theta0 = np.concatenate((np.real(roots), np.imag(roots)), axis=1)
 
 
-bs = 2
-n_iter = 10000
-gamma0 = 1e0
-ws, thetas = opt.SGD(NNenv, w0, theta0, bs, n_iter, gamma0, print_every=100)
+bs = 50
+n_iter = 1000000
+gamma0 = 1e-1
+ws, thetas = opt.SGD(NNenv, w0, theta0, bs, n_iter, gamma0, print_every=10)
 
 w_final, theta_final = ws[-1, ...], thetas[-1, ...]
 
 
 # Plot ground truth
-XX = np.linspace(0, 2, 2)
+xx = np.linspace(0, 2, 2)
 
 theta_bar = NNenv.theta_bar
+XX = np.sign(theta_bar[:, 0])[:, None]*xx[None, :]
+YY = np.divide(theta_bar[:, 1], theta_bar[:, 0])[:, None]*xx[None, :]
+XX = np.clip(XX, -2, 2)
+YY = np.clip(YY, -2, 2)
 for k in range(m0):
-    plt.plot(np.sign(theta_bar[k, 0])*XX, theta_bar[k, 1]/theta_bar[k, 0]*XX, linestyle='--', color='black')
+    # plt.plot(np.sign(theta_bar[k, 0])*XX, theta_bar[k, 1]/theta_bar[k, 0]*XX, linestyle='--', color='black')
+    plt.plot(XX[k, :], YY[k, :], linestyle='--', color='black')
+    plt.scatter(w0[k]*XX[k, -1], w0[k]*YY[k, -1], marker='+', color='orange')
 
 plt.scatter(w0*theta0[:, 0], w0*theta0[:, 1], color='blue', marker='.')
 plt.scatter(w_final*theta_final[:, 0], w_final*theta_final[:, 1], color='red', marker='.')
@@ -42,8 +48,8 @@ for k in range(m):
 
 # y_min, y_max = ax.get_ylim()
 # max_ylim = max(abs(y_min), abs(y_max))
-ax = plt.gca()
-ax.set_ylim(-2, 2)
+# ax = plt.gca()
+# ax.set_ylim(-2, 2)
 
 plt.legend()
 plt.show()
