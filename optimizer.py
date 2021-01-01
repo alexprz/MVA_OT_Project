@@ -89,6 +89,7 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
     ws, thetas = [np.copy(w)], [np.copy(theta)]
 
     fms, norm_grad_fms = [], []
+    Rms, Vms = [], []
     m = w.shape[0]
 
     for k in range(n_iter):
@@ -112,6 +113,10 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
         # Check new objective
         fm = env.fm(w, theta, x)
         fms.append(fm)
+        Rm = env.Rm(w, theta, x)
+        Rms.append(Rm)
+        Vm = env.Vm(w, theta)
+        Vms.append(Vm)
 
         e_w = np.linalg.norm(grad_w)
         e_theta = np.linalg.norm(grad_theta)
@@ -121,6 +126,12 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
         if print_every is not None and (k == 0 or (k+1) % print_every == 0):
             print(f'iter {k+1}: \t ∇w={e_w:.2e} \t ∇θ={e_theta:.2e} \t fm={fm:.2e} \t ∇fm={e:.2e}')
 
-    return np.array(ws), np.array(thetas), np.array(fms), np.array(norm_grad_fms)
+    ws = np.array(ws)
+    thetas = np.array(thetas)
+    fms = np.array(fms)
+    norm_grad_fms = np.array(norm_grad_fms)
+    Rms = np.array(Rms)
+    Vms = np.array(Vms)
+    return ws, thetas, fms, norm_grad_fms, Rms, Vms
 
 

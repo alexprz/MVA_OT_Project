@@ -12,7 +12,7 @@ plt.rcParams.update({
     'text.usetex': True,
     'mathtext.fontset': 'stix',
     'font.family': 'STIXGeneral',
-    'font.size': 15,
+    'font.size': 10,
     'figure.figsize': (12, 6),
 })
 
@@ -31,7 +31,7 @@ theta0 = np.concatenate((np.real(roots), np.imag(roots)), axis=1)
 bs = 100
 n_iter = 1000
 gamma0 = 1e-1
-ws, thetas, fms, norm_grad_fms = opt.SGD(tln_env, w0, theta0, bs, n_iter, gamma0, print_every=10)
+ws, thetas, fms, norm_grad_fms, Rms, Vms = opt.SGD(tln_env, w0, theta0, bs, n_iter, gamma0, print_every=10)
 
 w_final, theta_final = ws[-1, ...], thetas[-1, ...]
 
@@ -40,14 +40,21 @@ w_final, theta_final = ws[-1, ...], thetas[-1, ...]
 mean, cov = np.zeros(tln_env.d), np.eye(tln_env.d)
 x = np.random.multivariate_normal(mean, cov, size=1000)
 fm_bar = tln_env.fm(tln_env.w_bar, tln_env.theta_bar, x)
+Rm_bar = tln_env.Rm(tln_env.w_bar, tln_env.theta_bar, x)
+Vm_bar = tln_env.Vm(tln_env.w_bar, tln_env.theta_bar)
+
 grad_w_fm, grad_theta_fm = tln_env.grad_fm(tln_env.w_bar, tln_env.theta_bar, x)
 norm_grad_fm_bar = np.linalg.norm(grad_w_fm) + np.linalg.norm(grad_theta_fm)
 
 fig = plt.figure(figsize=(18, 6))
 ax = fig.add_subplot(132)
-ax.plot(fms)
+pF = ax.plot(fms, label='$F_m = R_m + V_m$')
+pR = ax.plot(Rms, label='$R_m$')
+pV = ax.plot(Vms, label='$V_m$')
 print(f'Optimal fm: {fm_bar}')
-ax.axhline(fm_bar, linestyle=':', color='black', label=f'$\\bar{{F}}$ ({fm_bar:.2e})')
+ax.axhline(fm_bar, linestyle=':', color=pF[0].get_color(), label=f'$\\bar{{F}} = \\bar{{R}} + \\bar{{V}}$ ({fm_bar:.3e})')
+ax.axhline(Rm_bar, linestyle=':', color=pR[0].get_color(), label=f'$\\bar{{R}}$ ({Rm_bar:.3e})')
+ax.axhline(Vm_bar, linestyle=':', color=pV[0].get_color(), label=f'$\\bar{{V}}$ ({Vm_bar:.3e})')
 ax.set_xlabel('Iterations')
 ax.set_ylabel(r'$F_m$')
 ax.set_title(r'Evolution of $F_m$')
