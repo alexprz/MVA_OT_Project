@@ -5,28 +5,6 @@ from abc import ABC, abstractmethod
 import activations as act
 
 
-def get_loss(name):
-    """Retrieve a loss function and its derivative from a name.
-
-    Args:
-    -----
-        name : str
-
-    Returns:
-    --------
-        callable
-            Loss function
-        callable
-            Derivative of the loss function
-
-    """
-    losses = {
-        'squared': Squared(),
-        'logistic': Logistic(),
-    }
-    return losses[name]
-
-
 class BaseLoss(ABC):
     """Abstract class for loss classes."""
 

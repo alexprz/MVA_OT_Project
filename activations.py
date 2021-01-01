@@ -3,28 +3,6 @@ import numpy as np
 from abc import ABC, abstractmethod
 
 
-def get_activation(name):
-    """Retrieve an activation function and its derivative from a name.
-
-    Args:
-    -----
-        name : str
-
-    Returns:
-    --------
-        callable
-            Activation function
-        callable
-            Derivative of the activation function
-
-    """
-    activations = {
-        'relu': ReLU(),
-        'sigmoid': Sigmoid(),
-    }
-    return activations[name]
-
-
 class BaseActivation(ABC):
     """Abstract class for activation classes."""
 
