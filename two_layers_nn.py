@@ -190,6 +190,22 @@ def V(w, theta):
     return np.abs(w)
 
 
+def Vm(w, theta):
+    """Implement the second layer of the paper.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+
+    Returns:
+    --------
+        np.array of shape (m,)
+
+    """
+    return V(w, theta).mean()
+
+
 def V_dw(w, theta):
     """Implement the second layer of the paper.
 
@@ -222,7 +238,7 @@ def V_dtheta(w, theta):
     return np.zeros_like(theta)
 
 
-def f_m(env, w, theta, n=1000):
+def f_m(env, w, theta, x):
     """Implement the discretized objective function F.
 
     Args:
@@ -230,23 +246,37 @@ def f_m(env, w, theta, n=1000):
         env : NNEnv named tuple
         w : np.array of shape (m,)
         theta : np.array of shape (m, d)
-        n : int
-            Number of normal samples to estimate the expectancy
+        x : np.array of shape (n, d-1)
 
     Returns:
     --------
         float
 
     """
-    mean, cov = np.zeros(env.d), np.eye(env.d)
-    x = np.random.multivariate_normal(mean, cov, size=n)
-
-    y_hat = env.forward(w, theta, x)
-    y = env.y(x)
-    loss = env.loss(y_hat, y)
-    fm = loss.mean() + env.V(w, theta).mean()
-
+    fm = env.Rm(w, theta, x) + env.Vm(w, theta)
     return fm.item()
+
+
+def Rm(w, theta, x, y, loss, sigma):
+    """Gradient of R wrt w and theta.
+
+    Args:
+    -----
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+        x : np.array of shape (n, d-1)
+        y : callable
+        sigma : callable
+        sigma_d : callable
+
+    Returns:
+    --------
+        grad_w : np.array of shape (n, m)
+        grad_theta : np.array of shape (n, m)
+
+    """
+    y_hat = layer2(w, theta, x, sigma)
+    return loss(y_hat, y(w, theta, x, sigma)).mean()
 
 
 def grad_Rm(w, theta, x, y, phi_dw, phi_dtheta, loss_d1, sigma, sigma_d):
@@ -255,17 +285,16 @@ def grad_Rm(w, theta, x, y, phi_dw, phi_dtheta, loss_d1, sigma, sigma_d):
     Args:
     -----
         w : np.array of shape (m,)
-        theta : np.array of shape (m,)
-        x : np.array of shape (n,)
+        theta : np.array of shape (m, d)
+        x : np.array of shape (n, d-1)
         y : callable
-        psi : callable
-        psi_p : callable
-        lbd : float
+        sigma : callable
+        sigma_d : callable
 
     Returns:
     --------
-        grad_w : np.array of shape (m,)
-        grad_theta : np.array of shape (m,)
+        grad_w : np.array of shape (n, m)
+        grad_theta : np.array of shape (n, m)
 
     """
     m = w.shape[0]
@@ -325,6 +354,8 @@ def paper_env(m0, sigma_name, loss_name):
         forward=lambda w, theta, x: layer2(w, theta, x, sigma),
         sigma=sigma,
         sigma_d=sigma_d,
+        Rm=lambda w, theta, x: Rm(w, theta, x, y, loss, sigma),
+        Vm=Vm,
         grad_Rm=lambda w, theta, x: grad_Rm(w, theta, x, y, phi_dw, phi_dtheta, loss_d1, sigma, sigma_d),
         subgrad_Vm=subgrad_Vm,
     )
