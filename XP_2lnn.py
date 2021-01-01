@@ -20,7 +20,7 @@ theta0 = np.concatenate((np.real(roots), np.imag(roots)), axis=1)
 bs = 100
 n_iter = 1000
 gamma0 = 1e-1
-ws, thetas, losses, losses_d = opt.SGD(NNenv, w0, theta0, bs, n_iter, gamma0, print_every=10)
+ws, thetas, fms = opt.SGD(NNenv, w0, theta0, bs, n_iter, gamma0, print_every=10)
 
 w_final, theta_final = ws[-1, ...], thetas[-1, ...]
 
@@ -28,17 +28,13 @@ w_final, theta_final = ws[-1, ...], thetas[-1, ...]
 # Plot loss evolution
 mean, cov = np.zeros(NNenv.d), np.eye(NNenv.d)
 x = np.random.multivariate_normal(mean, cov, size=1000)
-y = NNenv.y(x)
-y_hat = NNenv.forward(NNenv.w_bar, NNenv.theta_bar, x)
-optimal_loss = NNenv.loss(y_hat, y).mean()
-optimal_loss_d = NNenv.loss_d1(y_hat, y).mean()
+fm_bar = tln.f_m(NNenv, NNenv.w_bar, NNenv.theta_bar, x)
 
 fig = plt.figure(figsize=(16, 6))
 ax = fig.add_subplot(121)
-ax.plot(losses)
-print(f'Optimal loss: {optimal_loss}')
-print(f'Grad optimal loss: {optimal_loss_d}')
-ax.axhline(optimal_loss, linestyle=':', color='black', label=f'Optimal loss ({optimal_loss:.2e})')
+ax.plot(fms)
+print(f'Optimal fm: {fm_bar}')
+ax.axhline(fm_bar, linestyle=':', color='black', label=f'Optimal loss ({fm_bar:.2e})')
 
 ax.legend()
 
