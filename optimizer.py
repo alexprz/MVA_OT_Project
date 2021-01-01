@@ -1,5 +1,6 @@
 """Implement the optimizers that minimizes F."""
 import numpy as np
+from numpy.linalg import norm
 
 import sparse_deconvolution_1D as sd1
 
@@ -90,6 +91,7 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
 
     fms, norm_grad_fms = [], []
     Rms, Vms = [], []
+    norm_grad_Rms, norm_grad_Vms = [], []
     m = w.shape[0]
 
     for k in range(n_iter):
@@ -117,9 +119,13 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
         Rms.append(Rm)
         Vm = env.Vm(w, theta)
         Vms.append(Vm)
+        grad_w_rm, grad_theta_rm = env.grad_Rm(w, theta, x)
+        grad_w_vm, grad_theta_vm = env.subgrad_Vm(w, theta)
+        norm_grad_Rms.append(norm(grad_w_rm) + norm(grad_theta_rm))
+        norm_grad_Vms.append(norm(grad_w_vm) + norm(grad_theta_vm))
 
-        e_w = np.linalg.norm(grad_w)
-        e_theta = np.linalg.norm(grad_theta)
+        e_w = norm(grad_w)
+        e_theta = norm(grad_theta)
         e = e_w + e_theta
         norm_grad_fms.append(e)
 
@@ -132,6 +138,8 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
     norm_grad_fms = np.array(norm_grad_fms)
     Rms = np.array(Rms)
     Vms = np.array(Vms)
-    return ws, thetas, fms, norm_grad_fms, Rms, Vms
+    norm_grad_Rms = np.array(norm_grad_Rms)
+    norm_grad_Vms = np.array(norm_grad_Vms)
+    return ws, thetas, fms, norm_grad_fms, Rms, Vms, norm_grad_Rms, norm_grad_Vms
 
 
