@@ -1,90 +1,99 @@
 """Implement the loss functions for the NN example."""
 import numpy as np
+from abc import ABC, abstractmethod
 
 import activations as act
 
 
-def get_loss(name):
-    """Retrieve a loss function and its derivative from a name.
+class BaseLoss(ABC):
+    """Abstract class for loss classes."""
 
-    Args:
-    -----
-        name : str
+    def __call__(self, y1, y2):
+        """Shortcut to call the loss function."""
+        return self.loss(y1, y2)
 
-    Returns:
-    --------
-        callable
-            Loss function
-        callable
-            Derivative of the loss function
+    @staticmethod
+    @abstractmethod
+    def loss(y1, y2):
+        """Implement the loss function."""
+        return
 
-    """
-    losses = {
-        'squared': (squared, squared_d1),
-        'logistic': (logistic, logistic_d1),
-    }
-    return losses[name]
+    @staticmethod
+    @abstractmethod
+    def derivative(y1, y2):
+        """Implement the derivative of the loss function."""
+        return
 
 
-def squared(y1, y2):
-    """Implement the squared loss.
+class Squared(BaseLoss):
+    """Implement the squared loss function."""
 
-    Args:
-    -----
-        y1 : np.array of shape (n,)
-        y2 : np.array of shape (n,)
+    @staticmethod
+    def loss(y1, y2):
+        """Implement the squared loss.
 
-    Returns:
-    --------
-        l : np.array of shape (n,)
+        Args:
+        -----
+            y1 : np.array of shape (n,)
+            y2 : np.array of shape (n,)
 
-    """
-    return np.power(y1 - y2, 2)/2
+        Returns:
+        --------
+            l : np.array of shape (n,)
 
+        """
+        return np.power(y1 - y2, 2)/2
 
-def squared_d1(y1, y2):
-    """Implement the first derivative of the squared loss.
+    @staticmethod
+    def derivative(y1, y2):
+        """Implement the first derivative of the squared loss.
 
-    Args:
-    -----
-        y1 : np.array of shape (n,)
-        y2 : np.array of shape (n,)
+        Args:
+        -----
+            y1 : np.array of shape (n,)
+            y2 : np.array of shape (n,)
 
-    Returns:
-    --------
-        l : np.array of shape (n,)
+        Returns:
+        --------
+            l : np.array of shape (n,)
 
-    """
-    return y1 - y2
-
-
-def logistic(y1, y2):
-    """Implement the logistic loss.
-
-    Args:
-    -----
-        y1 : np.array of shape (n,)
-        y2 : np.array of shape (n,)
-
-    Returns:
-    --------
-        l : np.array of shape (n,)
-
-    """
-    return -np.log(act.sigmoid(y1*y2))/np.log(2)
+        """
+        return y1 - y2
 
 
-def logistic_d1(y1, y2):
-    """Implement the first derivative of the logistic loss.
+class Logistic(BaseLoss):
+    """Implement the logistic loss function."""
 
-    Args:
-    -----
-        y1 : np.array of shape (n,)
-        y2 : np.array of shape (n,)
+    @staticmethod
+    def loss(y1, y2):
+        """Implement the logistic loss.
 
-    Returns:
-    --------
-        l : np.array of shape (n,)
+        Args:
+        -----
+            y1 : np.array of shape (n,)
+            y2 : np.array of shape (n,)
 
-    """
-    return np.divide(y2, act.sigmoid_d(y1*y2))/np.log(2)
+        Returns:
+        --------
+            l : np.array of shape (n,)
+
+        """
+        sigmoid = act.Sigmoid.activation
+        return -np.log(sigmoid(y1*y2))/np.log(2)
+
+    @staticmethod
+    def derivative(y1, y2):
+        """Implement the first derivative of the logistic loss.
+
+        Args:
+        -----
+            y1 : np.array of shape (n,)
+            y2 : np.array of shape (n,)
+
+        Returns:
+        --------
+            l : np.array of shape (n,)
+
+        """
+        sigmoid_d = act.Sigmoid.derivative
+        return np.divide(y2, sigmoid_d(y1*y2))/np.log(2)

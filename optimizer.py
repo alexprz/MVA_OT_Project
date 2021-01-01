@@ -2,7 +2,6 @@
 import numpy as np
 
 import sparse_deconvolution_1D as sd1
-import two_layers_nn as tln
 
 
 def forward_backward_step(env, w, theta, gamma, lbd, n=1000):
@@ -85,54 +84,43 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
 
 
 def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
+    """Implement stochastic gradient descent for exemple 2."""
     w, theta = np.copy(w0), np.copy(theta0)
     ws, thetas = [np.copy(w)], [np.copy(theta)]
-    losses, losses_d = [], []
-    fms = []
+
+    fms, norm_grad_fms = [], []
     m = w.shape[0]
 
     for k in range(n_iter):
+        # Adjust step size
+        gamma = gamma0/np.power(k+1, .75)
+
         # Sample a batch
         mean, cov = np.zeros(env.d), np.eye(env.d)
         x = np.random.multivariate_normal(mean, cov, size=bs)
 
-        # Forward pass
-        # y_hat = env.forward(w, theta, x)
-        # loss = env.loss(y_hat, env.y(x))
-        # loss_d = env.loss_d1(y_hat, env.y(x))
-        # losses.append(loss.mean())
-        # losses_d.append(loss_d.mean())
+        # Compute the gradient over the batch
+        grad_w, grad_theta = env.grad_fm(w, theta, x)
 
-        # grad_w = env.phi_dw(w, theta, x)*loss_d[:, None]/m + env.V_dw(w, theta)/m
-        # grad_theta = env.phi_dtheta(w, theta, x)*loss_d[:, None, None]/m + env.V_dtheta(w, theta)/m
-
-        grad_w_R, grad_theta_R = env.grad_Rm(w, theta, x)
-        grad_w_V, grad_theta_V = env.subgrad_Vm(w, theta)
-
-        grad_w = grad_w_R.mean(axis=0) + grad_w_V
-        grad_theta = grad_theta_R.mean(axis=0) + grad_theta_V
-
-
-        # Approx the expectancy by Monte Carlo
-        # grad_w = grad_w.mean(axis=0)
-        # grad_theta = grad_theta.mean(axis=0)
-
-        gamma = gamma0/np.power(k+1, .75)
-
+        # Update point
         w -= m*gamma*grad_w
         theta -= m*gamma*grad_theta
 
         ws.append(np.copy(w))
         thetas.append(np.copy(theta))
 
-        fm = tln.f_m(env, w, theta, x)
+        # Check new objective
+        fm = env.fm(w, theta, x)
         fms.append(fm)
 
-        if print_every is not None and (k == 0 or (k+1) % print_every == 0):
-            e_w = np.linalg.norm(grad_w)
-            e_theta = np.linalg.norm(grad_theta)
-            print(f'iter {k+1}: \t ∇w={e_w:.2e} \t ∇θ={e_theta:.2e} \t fm={fm:.2e}')
+        e_w = np.linalg.norm(grad_w)
+        e_theta = np.linalg.norm(grad_theta)
+        e = e_w + e_theta
+        norm_grad_fms.append(e)
 
-    return np.array(ws), np.array(thetas), np.array(fms)
+        if print_every is not None and (k == 0 or (k+1) % print_every == 0):
+            print(f'iter {k+1}: \t ∇w={e_w:.2e} \t ∇θ={e_theta:.2e} \t fm={fm:.2e} \t ∇fm={e:.2e}')
+
+    return np.array(ws), np.array(thetas), np.array(fms), np.array(norm_grad_fms)
 
 
