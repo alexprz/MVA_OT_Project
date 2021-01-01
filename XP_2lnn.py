@@ -1,4 +1,6 @@
 """Implement the one hidden layer experiment of the paper."""
+import os
+import time
 import numpy as np
 from numpy.linalg import norm
 import matplotlib.pyplot as plt
@@ -17,9 +19,24 @@ plt.rcParams.update({
     'figure.figsize': (12, 6),
 })
 
+
+def scatterplot(w, theta, ax, **kwargs):
+    """Scatter particles."""
+    x = w*theta[:, 0]
+    y = w*theta[:, 1]
+    ax.scatter(x, y, **kwargs)
+
+
+def lineplot(w, theta, ax, **kwargs):
+    """Draw lines between (0, 0) and particles."""
+    x = np.stack((np.zeros_like(w), w*theta[:, 0]), axis=0)
+    y = np.stack((np.zeros_like(w), w*theta[:, 1]), axis=0)
+    ax.plot(100*x, 100*y, **kwargs)
+
+
 np.random.seed(0)
 m0 = 4
-tln_env = tln.paper_env(m0, act.ReLU(), losses.Squared())
+tln_env = tln.paper_env(m0, act.ReLU(), losses.Squared(), beta=1e-1)
 
 # Initialize the particle flow
 m = 10
@@ -27,6 +44,12 @@ eps = 1e-1
 w0 = eps*np.ones(m)
 roots = np.array([np.exp(2*np.pi*1j*k/m) for k in range(m)])[:, None]
 theta0 = np.concatenate((np.real(roots), np.imag(roots)), axis=1)
+w_bar = np.zeros_like(w0)
+theta_bar = np.zeros_like(theta0)
+w_bar[:m0] = m/m0*tln_env.w_bar
+theta_bar[:m0, :] = tln_env.theta_bar
+w0 = np.copy(w_bar)
+theta0 = np.copy(theta_bar)
 
 
 bs = 100
@@ -40,9 +63,9 @@ w_final, theta_final = ws[-1, ...], thetas[-1, ...]
 # Plot objective evolution
 mean, cov = np.zeros(tln_env.d), np.eye(tln_env.d)
 x = np.random.multivariate_normal(mean, cov, size=1000)
-fm_bar = tln_env.fm(tln_env.w_bar, tln_env.theta_bar, x)
-Rm_bar = tln_env.Rm(tln_env.w_bar, tln_env.theta_bar, x)
-Vm_bar = tln_env.Vm(tln_env.w_bar, tln_env.theta_bar)
+fm_bar = tln_env.fm(w_bar, theta_bar, x)
+Rm_bar = tln_env.Rm(w_bar, theta_bar, x)
+Vm_bar = tln_env.Vm(w_bar, theta_bar)
 
 fig = plt.figure(figsize=(18, 6))
 ax = fig.add_subplot(132)
@@ -59,9 +82,9 @@ ax.set_title(r'Evolution of $F_m$')
 ax.legend()
 
 # Gradient
-grad_w_fm, grad_theta_fm = tln_env.grad_fm(tln_env.w_bar, tln_env.theta_bar, x)
-grad_w_Rm, grad_theta_Rm = tln_env.grad_Rm(tln_env.w_bar, tln_env.theta_bar, x)
-grad_w_Vm, grad_theta_Vm = tln_env.subgrad_Vm(tln_env.w_bar, tln_env.theta_bar)
+grad_w_fm, grad_theta_fm = tln_env.grad_fm(w_bar, theta_bar, x)
+grad_w_Rm, grad_theta_Rm = tln_env.grad_Rm(w_bar, theta_bar, x)
+grad_w_Vm, grad_theta_Vm = tln_env.subgrad_Vm(w_bar, theta_bar)
 norm_grad_fm_bar = norm(grad_w_fm) + norm(grad_theta_fm)
 norm_grad_Rm_bar = norm(grad_w_Rm) + norm(grad_theta_Rm)
 norm_grad_Vm_bar = norm(grad_w_Vm) + norm(grad_theta_Vm)
@@ -83,11 +106,11 @@ ax.legend()
 
 # Plot ground truth
 ax2 = fig.add_subplot(131)
-xx = np.linspace(0, 2, 2)
 
-
-ax2.scatter(w0*theta0[:, 0], w0*theta0[:, 1], color='blue', marker='.')
-ax2.scatter(w_final*theta_final[:, 0], w_final*theta_final[:, 1], color='red', marker='.')
+scatterplot(w0, theta0, ax2, color='blue', marker='.')
+scatterplot(w_final, theta_final, ax2, color='red', marker='.')
+# ax2.scatter(w0*theta0[:, 0], w0*theta0[:, 1], color='blue', marker='.')
+# ax2.scatter(w_final*theta_final[:, 0], w_final*theta_final[:, 1], color='red', marker='.')
 ax2.set_xlabel(r'$\theta_1$')
 ax2.set_ylabel(r'$\theta_2$')
 ax2.set_title('Trajectories of the particles')
@@ -96,16 +119,20 @@ ax2.set_title('Trajectories of the particles')
 # y_min, y_max = ax2.get_ylim()
 # print(x_min, x_max)
 # print(y_min, y_max)
+w_bar = tln_env.w_bar
 theta_bar = tln_env.theta_bar
-XX = np.sign(theta_bar[:, 0])[:, None]*xx[None, :]
-YY = np.divide(theta_bar[:, 1], theta_bar[:, 0])[:, None]*xx[None, :]
-XX = np.clip(XX, -1, 1)
-YY = np.clip(YY, -1, 1)
-for k in range(m0):
-    # plt.plot(np.sign(theta_bar[k, 0])*XX, theta_bar[k, 1]/theta_bar[k, 0]*XX, linestyle='--', color='black')
-    label = 'Optimal positions' if k == 0 else ''
-    ax2.plot(XX[k, :], YY[k, :], linestyle='--', color='black', label=label)
-    ax2.scatter(w0[k]*XX[k, -1], w0[k]*YY[k, -1], marker='+', color='orange')
+# xx = np.linspace(0, 2, 2)
+# XX = np.sign(theta_bar[:, 0])[:, None]*xx[None, :]
+# YY = np.divide(theta_bar[:, 1], theta_bar[:, 0])[:, None]*xx[None, :]
+# XX = np.clip(XX, -1, 1)
+# YY = np.clip(YY, -1, 1)
+# for k in range(m0):
+#     # plt.plot(np.sign(theta_bar[k, 0])*XX, theta_bar[k, 1]/theta_bar[k, 0]*XX, linestyle='--', color='black')
+#     label = 'Optimal positions' if k == 0 else ''
+#     ax2.plot(XX[k, :], YY[k, :], linestyle='--', color='black', label=label)
+#     # ax2.scatter(w_bar[k]*XX[k, -1], w_bar[k]*YY[k, -1], marker='+', color='orange')
+
+scatterplot(w_bar, theta_bar, ax2, marker='+', color='orange')
 
 # Plot paths
 for k in range(m):
@@ -115,7 +142,16 @@ for k in range(m):
 # max_ylim = max(abs(y_min), abs(y_max))
 # ax = plt.gca()
 # ax.set_ylim(-2, 2)
+x_min, x_max = ax2.get_xlim()
+y_min, y_max = ax2.get_ylim()
+lineplot(w_bar, theta_bar, ax2, linestyle='--', color='black', label='Optimal positions')
+ax2.set_xlim(x_min, x_max)
+ax2.set_ylim(y_min, y_max)
 ax2.legend()
 
 plt.tight_layout()
+
+os.makedirs('fig/', exist_ok=True)
+plt.savefig(f'fig/tln-b_{tln_env.beta}-{time.time()}.pdf')
+
 plt.show()
