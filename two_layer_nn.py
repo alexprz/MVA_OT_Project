@@ -54,7 +54,12 @@ class TwoLayerNN():
 
         """
         act = self.activation.derivative if use_derivative else self.activation
-        return act(np.inner(x, theta[:, :-1]) + theta[None, :, -1])
+        x = x.reshape(-1, 1) if x.ndim == 1 else x
+        assert np.inner(x, theta[:, :-1]).shape == (x.shape[0], theta.shape[0])  # To delete
+        x = np.concatenate((x, np.ones(x.shape[0], 1)), axis=1)
+        assert act(np.inner(x, theta)).shape == (x.shape[0], theta.shape[0])  # To delete
+        return act(np.inner(x, theta))
+        # return act(np.inner(x, theta[:, :-1]) + theta[None, :, -1])
 
     def layer2(self, w, theta, x):
         """Implement the second layer of the paper.
@@ -148,7 +153,7 @@ class TwoLayerNN():
 
         Returns:
         --------
-            np.array of shape (n, m)
+            np.array of shape (n, m, d)
 
         """
         d1 = self._phi_dtheta1(w, theta, x)
@@ -183,71 +188,8 @@ class TwoLayerNN():
             np.array of shape (n,)
 
         """
-        return self.layer2(self.w_bar, self.theta_bar, x)
-
-    # @staticmethod
-    # def V(w, theta):
-    #     """Implement the second layer of the paper.
-
-    #     Args:
-    #     -----
-    #         w : np.array of shape (m,)
-    #         theta : np.array of shape (m, d)
-
-    #     Returns:
-    #     --------
-    #         np.array of shape (m,)
-
-    #     """
-    #     return np.abs(w)*np.linalg.norm(theta, ord=1, axis=1)
-
-    @staticmethod
-    def V(w, theta):
-        """Implement the second layer of the paper.
-
-        Args:
-        -----
-            w : np.array of shape (m,)
-            theta : np.array of shape (m, d)
-
-        Returns:
-        --------
-            np.array of shape (m,)
-
-        """
-        return np.abs(w)
-
-    @staticmethod
-    def V_dw(w, theta):
-        """Implement the second layer of the paper.
-
-        Args:
-        -----
-            w : np.array of shape (m,)
-            theta : np.array of shape (m, d)
-
-        Returns:
-        --------
-            np.array of shape (m,)
-
-        """
-        return np.sign(w)
-
-    @staticmethod
-    def V_dtheta(w, theta):
-        """Implement the second layer of the paper.
-
-        Args:
-        -----
-            w : np.array of shape (m,)
-            theta : np.array of shape (m, d)
-
-        Returns:
-        --------
-            np.array of shape (m, d)
-
-        """
-        return np.zeros_like(theta)
+        # return self.layer2(self.w_bar, self.theta_bar, x)
+        return self.y(self.w_bar, self.theta_bar, x)
 
     def Vm(self, w, theta):
         """Implement the second layer of the paper.
@@ -262,7 +204,7 @@ class TwoLayerNN():
             float
 
         """
-        return self.beta*TwoLayerNN.V(w, theta).mean().item()
+        return self.beta*np.abs(w).mean().item()
 
     def subgrad_Vm(self, w, theta):
         """Return a subgradient of V.
@@ -279,10 +221,10 @@ class TwoLayerNN():
 
         """
         m = w.shape[0]
-        subgrad_w = self.beta*TwoLayerNN.V_dw(w, theta)
-        subgrad_theta = self.beta*TwoLayerNN.V_dtheta(w, theta)
+        subgrad_w = self.beta*np.sign(w)/m
+        subgrad_theta = self.beta*np.zeros_like(theta)/m
 
-        return subgrad_w/m, subgrad_theta/m
+        return subgrad_w, subgrad_theta
 
     def Rm(self, w, theta, x):
         """Gradient of R wrt w and theta.
@@ -320,9 +262,9 @@ class TwoLayerNN():
         m = w.shape[0]
         y_hat = self.y(w, theta, x)
         y_bar = self.y_bar(x)
-        loss_d = self.loss.derivative(y_hat, y_bar)
+        loss_d = self.loss.derivative(y_hat, y_bar)  # (n,)
 
-        grad_w = self.phi_dw(theta, x)*loss_d[:, None]/m
+        grad_w = self.phi_dw(theta, x)*loss_d[:, None]/m  # (n, m)
         grad_theta = self.phi_dtheta(w, theta, x)*loss_d[:, None, None]/m
 
         return grad_w.mean(axis=0), grad_theta.mean(axis=0)
