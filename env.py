@@ -36,4 +36,6 @@ NNEnv = namedtuple('NNEnv', [
     'forward',
     'sigma',
     'sigma_d',
+    'grad_Rm',
+    'subgrad_Vm',
 ])
