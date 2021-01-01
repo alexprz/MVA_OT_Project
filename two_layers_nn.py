@@ -222,6 +222,33 @@ def V_dtheta(w, theta):
     return np.zeros_like(theta)
 
 
+def f_m(env, w, theta, n=1000):
+    """Implement the discretized objective function F.
+
+    Args:
+    -----
+        env : NNEnv named tuple
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+        n : int
+            Number of normal samples to estimate the expectancy
+
+    Returns:
+    --------
+        float
+
+    """
+    mean, cov = np.zeros(env.d), np.eye(env.d)
+    x = np.random.multivariate_normal(mean, cov, size=n)
+
+    y_hat = env.forward(w, theta, x)
+    y = env.y(x)
+    loss = env.loss(y_hat, y)
+    fm = loss.mean() + env.V(w, theta).mean()
+
+    return fm.item()
+
+
 def paper_env(m0, sigma_name, loss_name):
     d = 3
 

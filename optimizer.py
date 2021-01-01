@@ -1,53 +1,7 @@
 """Implement the optimizers that minimizes F."""
 import numpy as np
 
-
-def f_m(env, w, theta, n=1000):
-    """Implement the discretized objective function F.
-
-    Args:
-    -----
-        env : Env named tuple
-        w : np.array of shape (m,)
-        theta : np.array of shape (m, d)
-        n : int
-            Discretization for the integral computation
-
-    Returns:
-    --------
-        float
-
-    """
-    if env.x_min.ndim == 1:
-        x = np.linspace(0, 1, n)
-    else:
-        raise NotImplementedError('Add case ndim > 1')
-
-    fm = env.R(env.phi(w, theta, x).mean(axis=0)) + env.V(w, theta).mean()
-    return fm.item()
-
-
-def subgrad_f_m(env, w, theta, n=1000):
-    """Evaluate a subgradient of the objective f_m.
-
-    Args:
-    -----
-        env : Env named tuple
-        w : np.array of shape (m,)
-        theta : np.array of shape (m, d)
-        n : int
-            Discretization for the integral computation
-
-    Returns:
-    --------
-        subgrad_w : np.array of shape (m,)
-        subgrad_theta : np.array of shape (m, d)
-
-    """
-    x = np.linspace(env.x_min, env.x_max, n)
-    grad_R = env.grad_R(w, theta, x)
-    subgrad_V = env.subgrad_V(w, theta)
-    return grad_R[0] + subgrad_V[0], grad_R[1] + subgrad_V[1]
+import sparse_deconvolution_1D as sd1
 
 
 def forward_backward_step(env, w, theta, gamma, lbd, n=1000):
@@ -120,9 +74,9 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
 
         # Check subgradient and objective value
         if print_every is not None and k % print_every == 0:
-            subgrad_w, subgrad_theta = subgrad_f_m(env, w, theta, n)
+            subgrad_w, subgrad_theta = sd1.subgrad_f_m(env, w, theta, n)
             e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
-            fm = f_m(env, w, theta, n)
+            fm = sd1.f_m(env, w, theta, n)
 
             print(f'iter {k}: \t e={e:.2e} \t fm={fm:.2e}')
 
@@ -132,6 +86,7 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
 def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
     w, theta = np.copy(w0), np.copy(theta0)
     ws, thetas = [np.copy(w)], [np.copy(theta)]
+    losses, losses_d = [], []
     m = w.shape[0]
 
     for k in range(n_iter):
@@ -143,6 +98,8 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
         y_hat = env.forward(w, theta, x)
         loss = env.loss(y_hat, env.y(x))
         loss_d = env.loss_d1(y_hat, env.y(x))
+        losses.append(loss.mean())
+        losses_d.append(loss_d.mean())
 
         grad_w = env.phi_dw(w, theta, x)*loss_d[:, None]/m + env.V_dw(w, theta)/m
         grad_theta = env.phi_dtheta(w, theta, x)*loss_d[:, None, None]/m + env.V_dtheta(w, theta)/m
@@ -159,11 +116,11 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
         ws.append(np.copy(w))
         thetas.append(np.copy(theta))
 
-        if print_every is not None and k % print_every == 0:
+        if print_every is not None and (k == 0 or (k+1) % print_every == 0):
             e_w = np.linalg.norm(grad_w)
             e_theta = np.linalg.norm(grad_theta)
             print(f'iter {k+1}: \t ∇w={e_w:.2e} \t ∇θ={e_theta:.2e} \t loss={loss.mean():.2e} \t loss_d={loss_d.mean():.2e}')
 
-    return np.array(ws), np.array(thetas)
+    return np.array(ws), np.array(thetas), np.array(losses), np.array(losses_d)
 
 
