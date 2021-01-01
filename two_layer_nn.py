@@ -55,11 +55,8 @@ class TwoLayerNN():
         """
         act = self.activation.derivative if use_derivative else self.activation
         x = x.reshape(-1, 1) if x.ndim == 1 else x
-        assert np.inner(x, theta[:, :-1]).shape == (x.shape[0], theta.shape[0])  # To delete
-        x = np.concatenate((x, np.ones(x.shape[0], 1)), axis=1)
-        assert act(np.inner(x, theta)).shape == (x.shape[0], theta.shape[0])  # To delete
+        x = np.concatenate((x, np.ones((x.shape[0], 1))), axis=1)
         return act(np.inner(x, theta))
-        # return act(np.inner(x, theta[:, :-1]) + theta[None, :, -1])
 
     def layer2(self, w, theta, x):
         """Implement the second layer of the paper.
@@ -324,7 +321,7 @@ def paper_env(m0, activation, loss, beta):
     d = 3
 
     # Generate ground truth
-    w_bar = np.random.normal(0, 1, size=m0)
+    w_bar = 1e-1*np.random.normal(0, 1, size=m0)
     mean, cov = np.zeros(d-1), np.eye(d-1)
     theta_bar = np.random.multivariate_normal(mean, cov, size=m0)
 
