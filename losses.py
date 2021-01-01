@@ -46,7 +46,7 @@ class Squared(BaseLoss):
 
     @staticmethod
     def derivative(y1, y2):
-        """Implement the first derivative of the squared loss.
+        """Implement the derivative wrt the first variable.
 
         Args:
         -----
@@ -79,11 +79,11 @@ class Logistic(BaseLoss):
 
         """
         sigmoid = act.Sigmoid.activation
-        return -np.log(sigmoid(y1*y2))/np.log(2)
+        return -np.log(sigmoid(y1*y2))
 
     @staticmethod
     def derivative(y1, y2):
-        """Implement the first derivative of the logistic loss.
+        """Implement the first derivative wrt to the first variable.
 
         Args:
         -----
@@ -95,5 +95,5 @@ class Logistic(BaseLoss):
             l : np.array of shape (n,)
 
         """
-        sigmoid_d = act.Sigmoid.derivative
-        return np.divide(y2, sigmoid_d(y1*y2))/np.log(2)
+        sigmoid = act.Sigmoid.activation
+        return -y2*sigmoid(-y1*y2)
