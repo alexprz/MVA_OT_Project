@@ -87,7 +87,8 @@ class Logistic():
             l : np.array of shape (n,)
 
         """
-        return -np.log(act.sigmoid(y1*y2))/np.log(2)
+        sigmoid = act.Sigmoid.activation
+        return -np.log(sigmoid(y1*y2))/np.log(2)
 
     @staticmethod
     def derivative(y1, y2):
@@ -103,4 +104,5 @@ class Logistic():
             l : np.array of shape (n,)
 
         """
-        return np.divide(y2, act.sigmoid_d(y1*y2))/np.log(2)
+        sigmoid_d = act.Sigmoid.derivative
+        return np.divide(y2, sigmoid_d(y1*y2))/np.log(2)

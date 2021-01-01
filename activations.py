@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def get_sigma(name):
+def get_activation(name):
     """Retrieve an activation function and its derivative from a name.
 
     Args:
@@ -17,69 +17,85 @@ def get_sigma(name):
             Derivative of the activation function
 
     """
-    sigmas = {
-        'relu': (relu, relu_d),
-        'sigmoid': (sigmoid, sigmoid_d),
+    activations = {
+        'relu': ReLU(),
+        'sigmoid': Sigmoid(),
     }
-    return sigmas[name]
+    return activations[name]
 
 
-def sigmoid(s):
-    """Implement the sigmoid activation function.
+class Sigmoid():
+    """Implement the sigmoid activation function."""
 
-    Args:
-    -----
-        s : np.array of shape (n,)
+    def __call__(self, s):
+        """Shortcut to call the activation function."""
+        return self.activation(s)
 
-    Returns:
-    --------
-        sigma : np.array of shape (n,)
+    @staticmethod
+    def activation(s):
+        """Implement the sigmoid activation function.
 
-    """
-    return np.divide(1, 1 + np.exp(-s))
+        Args:
+        -----
+            s : np.array of shape (n,)
 
+        Returns:
+        --------
+            sigma : np.array of shape (n,)
 
-def sigmoid_d(s):
-    """Implement the derivative of the sigmoid activation function.
+        """
+        return np.divide(1, 1 + np.exp(-s))
 
-    Args:
-    -----
-        s : np.array of shape (n,)
+    @staticmethod
+    def derivative(s):
+        """Implement the derivative of the sigmoid activation function.
 
-    Returns:
-    --------
-        sigma : np.array of shape (n,)
+        Args:
+        -----
+            s : np.array of shape (n,)
 
-    """
-    sigm = sigmoid(s)
-    return sigm*(1 - sigm)
+        Returns:
+        --------
+            sigma : np.array of shape (n,)
 
-
-def relu(s):
-    """Implement the ReLU activation function.
-
-    Args:
-    -----
-        s : np.array of shape (n,)
-
-    Returns:
-    --------
-        r : np.array of shape (n,)
-
-    """
-    return np.maximum(0, s)
+        """
+        sigmoid = Sigmoid.activation(s)
+        return sigmoid*(1 - sigmoid)
 
 
-def relu_d(s):
-    """Implement the "derivative" of the ReLU activation function.
+class ReLU():
+    """Implement the ReLU activation function."""
 
-    Args:
-    -----
-        s : np.array of shape (n,)
+    def __call__(self, s):
+        """Shortcut to call the activation function."""
+        return self.activation(s)
 
-    Returns:
-    --------
-        r : np.array of shape (n,)
+    @staticmethod
+    def activation(s):
+        """Implement the ReLU activation function.
 
-    """
-    return np.array(s > 0).astype(int)
+        Args:
+        -----
+            s : np.array of shape (n,)
+
+        Returns:
+        --------
+            r : np.array of shape (n,)
+
+        """
+        return np.maximum(0, s)
+
+    @staticmethod
+    def derivative(s):
+        """Implement the "derivative" of the ReLU activation function.
+
+        Args:
+        -----
+            s : np.array of shape (n,)
+
+        Returns:
+        --------
+            r : np.array of shape (n,)
+
+        """
+        return np.array(s > 0).astype(int)
