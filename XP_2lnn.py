@@ -32,20 +32,32 @@ def lineplot(w, theta, ax, **kwargs):
     """Draw lines between (0, 0) and particles."""
     x = np.stack((np.zeros_like(w), w*theta[:, 0]), axis=0)
     y = np.stack((np.zeros_like(w), w*theta[:, 1]), axis=0)
-    ax.plot(1e4*x, 1e4*y, **kwargs)
+    # x = np.stack((-w*theta[:, 0], w*theta[:, 0]), axis=0)
+    # y = np.stack((-w*theta[:, 1], w*theta[:, 1]), axis=0)
+    ax.plot(1e1*x, 1e1*y, **kwargs)
 
 
 np.random.seed(0)
-m0 = 4
-tln_env = tln.paper_env(m0, act.ReLU(), losses.Squared(), beta=1)
+m0 = 5
+# tln_env = tln.paper_env(m0, act.ReLU(), losses.Squared(), beta=1)
+tln_env = tln.his_code_env(m0, lbd=3e-2)
 
 # Initialize the particle flow
-m = 10
+m = 100
 eps = 1e-1
 w0 = eps*np.ones(m)
 roots = np.array([np.exp(2*np.pi*1j*k/m) for k in range(m)])[:, None]
 theta0 = np.concatenate((np.real(roots), np.imag(roots)), axis=1)
 w_bar, theta_bar = tln_env.w_bar, tln_env.theta_bar
+
+# u0 = np.random.normal(0, 1, size=(m, tln_env.d+1))
+# u0 /= np.linalg.norm(u0, axis=1)[:, None]
+# w0 = u0[:, 0]
+# theta0 = u0[:, 1:]
+
+print(w0.shape)
+print(theta0.shape)
+
 # w_bar = np.zeros_like(w0)
 # theta_bar = np.zeros_like(theta0)
 # w_bar[:m0] = m/m0*tln_env.w_bar
@@ -54,9 +66,9 @@ w_bar, theta_bar = tln_env.w_bar, tln_env.theta_bar
 # theta0 = np.copy(theta_bar)
 
 # Optimize the particle flow
-bs = 10
+bs = 15
 n_iter = 1000
-gamma0 = 1e-2
+gamma0 = 2
 ws, thetas, fms, norm_grad_fms, Rms, Vms, norm_grad_Rms, norm_grad_Vms = opt.SGD(tln_env, w0, theta0, bs, n_iter, gamma0, print_every=10)
 
 w_final, theta_final = ws[-1, ...], thetas[-1, ...]
@@ -83,6 +95,7 @@ lineplot(tln_env.w_bar, tln_env.theta_bar, ax, linestyle='--', color='black', la
 ax.set_xlim(x_min, x_max)
 ax.set_ylim(y_min, y_max)
 ax.legend()
+lineplot(w_final, theta_final, ax, linestyle=':', color='cyan')
 
 # Plot objective evolution
 mean, cov = np.zeros(tln_env.d), np.eye(tln_env.d)
@@ -138,7 +151,8 @@ y0 = tln_env.y(w0, theta0, x)
 cmap = cm.get_cmap('viridis', 256)
 sm = cm.ScalarMappable(cmap=cmap)
 colors = sm.to_rgba(y0)
-ax.scatter(x, np.zeros_like(x), label='Sampled x', marker='.', color=colors)
+# ax.scatter(x, np.zeros_like(x), label='Sampled x', marker='.', color=colors)
+ax.scatter(x[:, 0], x[:, 1], label='Sampled x', marker='.', color=colors)
 ax.set_title('Labels of network before SGD')
 ax.set_xlabel('$x$')
 ax.get_yaxis().set_visible(False)
@@ -152,7 +166,8 @@ y_hat = tln_env.y(w_final, theta_final, x)
 cmap = cm.get_cmap('viridis', 256)
 sm = cm.ScalarMappable(cmap=cmap)
 colors = sm.to_rgba(y_hat)
-ax.scatter(x, np.zeros_like(x), label='Sampled x', marker='.', color=colors)
+# ax.scatter(x, np.zeros_like(x), label='Sampled x', marker='.', color=colors)
+ax.scatter(x[:, 0], x[:, 1], label='Sampled x', marker='.', color=colors)
 ax.set_title('Labels of network after SGD')
 ax.set_xlabel('$x$')
 ax.get_yaxis().set_visible(False)
@@ -165,7 +180,8 @@ y_bar = tln_env.y_bar(x)
 cmap = cm.get_cmap('viridis', 256)
 sm = cm.ScalarMappable(cmap=cmap)
 colors = sm.to_rgba(y_bar)
-ax.scatter(x, np.zeros_like(x), label='Sampled x', marker='.', color=colors)
+# ax.scatter(x, np.zeros_like(x), label='Sampled x', marker='.', color=colors)
+ax.scatter(x[:, 0], x[:, 1], label='Sampled x', marker='.', color=colors)
 ax.set_title('Ground truth labels')
 ax.set_xlabel('$x$')
 ax.get_yaxis().set_visible(False)
