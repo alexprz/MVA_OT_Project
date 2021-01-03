@@ -15,7 +15,8 @@ class BaseParameters(ABC):
 class SD1Parameters(BaseParameters):
     """Store parameters for the sparse deconvolution example."""
 
-    def __init__(self, m0, w0, theta0, lbd, kernel, n_iter, fb_gamma, fb_lbd):
+    def __init__(self, m0, w0, theta0, lbd, kernel,
+                 n_iter, fb_gamma, fb_lbd, n):
         """Init.
 
         Args:
@@ -35,16 +36,19 @@ class SD1Parameters(BaseParameters):
                 Parameter of the FB algo
             fb_lbd : float
                 Parameter of the FB algo
+            n : int
+                Discretization for the integral computation
 
         """
         self.m0 = m0
-        self.n_iter = n_iter
         self.w0 = w0
         self.theta0 = theta0
         self.lbd = lbd
+        self.n_iter = n_iter
+        self.kernel = kernel
         self.fb_gamma = fb_gamma
         self.fb_lbd = fb_lbd
-        self.kernel = kernel
+        self.n = n
 
         assert isinstance(kernel, kernels.BaseKernel)
 
@@ -52,7 +56,7 @@ class SD1Parameters(BaseParameters):
 class SD1PaperParams(SD1Parameters):
     """Implement the parameters of the paper for sparse deconvolution."""
 
-    def __init__(self, m, lbd, fb_gamma, fb_lbd, n=7):
+    def __init__(self, m, lbd, fb_gamma, fb_lbd, n, order=7):
         """Init.
 
         Args:
@@ -66,23 +70,28 @@ class SD1PaperParams(SD1Parameters):
             fb_lbd : float
                 Parameter of the FB algo
             n : int
+                Discretization for the integral computation
+            order : int
                 Order of the Dirichlet kernel
 
         """
-        self.m0 = 5
-        self.n_iter = 10000
-        self.w0 = np.zeros(m)
-        self.theta0 = np.arange(m)/m
-        self.lbd = lbd
-        self.fb_gamma = fb_gamma
-        self.fb_lbd = fb_lbd
-        self.kernel = kernels.DirichletKernel(period=1, n=n)
+        super().__init__(
+            m0=5,
+            w0=np.zeros(m),
+            theta0=np.arange(m)/m,
+            lbd=lbd,
+            kernel=kernels.DirichletKernel(period=1, n=order),
+            n_iter=10000,
+            fb_gamma=fb_gamma,
+            fb_lbd=fb_lbd,
+            n=n
+        )
 
 
 class SD1GaussianParams(SD1Parameters):
     """Implement custom parameters with gaussian for sparse deconvolution."""
 
-    def __init__(self, m, lbd, fb_gamma, fb_lbd, sigma):
+    def __init__(self, m, lbd, fb_gamma, fb_lbd, sigma, n):
         """Init.
 
         Args:
@@ -97,13 +106,18 @@ class SD1GaussianParams(SD1Parameters):
                 Parameter of the FB algo
             sigma : float
                 Width of the Gaussian kernel
+            n : int
+                Discretization for the integral computation
 
         """
-        self.m0 = 5
-        self.n_iter = 10000
-        self.w0 = np.zeros(m)
-        self.theta0 = np.arange(m)/m
-        self.lbd = lbd
-        self.fb_gamma = fb_gamma
-        self.fb_lbd = fb_lbd
-        self.kernel = kernels.GaussianKernel(sigma)
+        super().__init__(
+            m0=5,
+            w0=np.zeros(m),
+            theta0=np.arange(m)/m,
+            lbd=lbd,
+            kernel=kernels.GaussianKernel(sigma),
+            n_iter=10000,
+            fb_gamma=fb_gamma,
+            fb_lbd=fb_lbd,
+            n=n
+        )
