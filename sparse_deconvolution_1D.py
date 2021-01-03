@@ -1,30 +1,30 @@
 """Implement the sparse deconvolution example of the paper."""
 import numpy as np
 
-from env import Env
-import kernels
+import parameters
 
 
 class SparseDeconvolution():
     """Implement the sparse deconvolution example of the paper."""
 
-    def __init__(self, kernel, w_bar, theta_bar, lbd):
+    def __init__(self, w_bar, theta_bar, params):
         """Init.
 
         Args:
         -----
-            kernel: kernels.BaseKernel object
             w_bar : np.array of shape (m,)
                 The ground truth weights
             theta_bar : np.array of shape (m,)
                 The ground truth positions
+            params : parameters.SD1Parameters object
 
         """
-        assert isinstance(kernel, kernels.BaseKernel)
-        self.kernel = kernel
+        assert isinstance(params, parameters.SD1Parameters)
+        self.params = params
+        self.kernel = params.kernel
         self.w_bar = w_bar
         self.theta_bar = theta_bar
-        self.lbd = lbd
+        self.lbd = params.lbd
 
         self.x_min = 0
         self.x_max = 1
@@ -270,4 +270,4 @@ def paper_env(params):
     w_bar = signs*np.random.uniform(0.5, 1.5, size=params.m0)  # weights
     theta_bar = SparseDeconvolution.draw_positions_1D(params.m0)  # positions
 
-    return SparseDeconvolution(params.kernel, w_bar, theta_bar, params.lbd)
+    return SparseDeconvolution(w_bar, theta_bar, params)
