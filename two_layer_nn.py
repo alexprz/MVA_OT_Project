@@ -1,37 +1,26 @@
 """Implement the two layer neural network example of the paper."""
 import numpy as np
 
-import losses
-import activations
-
 
 class TwoLayerNN():
     """Implement functions for the NN example of the paper."""
 
-    def __init__(self, activation, loss, w_bar, theta_bar, beta=1):
+    def __init__(self, params):
         """Init.
 
         Args:
         -----
-            activation : activations.BaseActivation object
-            loss : losses.BaseLoss object
-            w_bar : np.array of shape (m,)
-                The optimal w
-            theta_bar : np.array of shape (m, d)
-                The optimal theta
+            params : parameters.TLNParameters object
 
         """
-        # Check arguments
-        assert isinstance(activation, activations.BaseActivation)
-        assert isinstance(loss, losses.BaseLoss)
+        self.activation = params.activation
+        self.loss = params.loss
 
-        self.activation = activation
-        self.loss = loss
+        self.w_bar = params.w_bar
+        self.theta_bar = params.theta_bar
 
-        self.w_bar = w_bar
-        self.theta_bar = theta_bar
-
-        self.beta = beta
+        self.beta = 1/params.lbd
+        self.params = params
 
         # Estimate the mean value of the ground truth y_bar
         mean, cov = np.zeros(self.d), np.eye(self.d)
@@ -356,41 +345,52 @@ class TwoLayerNN():
         return grad_w_r + grad_w_v, grad_theta_r + grad_theta_v
 
 
-def paper_env(m0, activation, loss, beta):
+def paper_ground_truth(m0):
     """Create the environment of the paper.
 
     Args:
     -----
         m0 : int
             Number of neurons in the ground truth
-        activation : activations.BaseActivation object
-        loss : losses.BaseLoss object
 
     Returns:
     --------
-        two_layer_nn.TwoLayerNN object
+            w_bar : np.array of shape (m,)
+            theta_bar : np.array of shape (m, 2)
 
     """
-    d = 3
+    d = 2
 
     # Generate ground truth
     w_bar = np.random.normal(0, 1, size=m0)
-    mean, cov = np.zeros(d-1), np.eye(d-1)
+    mean, cov = np.zeros(d), np.eye(d)
     theta_bar = np.random.multivariate_normal(mean, cov, size=m0)
 
-    return TwoLayerNN(activation, loss, w_bar, theta_bar, beta)
+    return w_bar, theta_bar
 
 
-def his_code_env(m0=3, lbd=2e-3):
+def paper2_ground_truth(m0):
+    """Create the environment of the second paper.
+
+    Args:
+    -----
+        m0 : int
+            Number of neurons in the ground truth
+
+    Returns:
+    --------
+            w_bar : np.array of shape (m,)
+            theta_bar : np.array of shape (m, 2)
+
+    """
     d = 2
 
     # Generate ground truth
     w_bar = np.sign(np.random.normal(0, 1, size=m0))
-    # mean, cov = np.zeros(d-1), np.eye(d-1)
-    # theta_bar = np.random.multivariate_normal(mean, cov, size=m0)
     theta_bar = np.random.normal(0, 1, size=(m0, d))
+
 
     # Normalize
     theta_bar /= np.linalg.norm(theta_bar, axis=1)[:, None]
 
-    return TwoLayerNN(activations.ReLU(), losses.Logistic(), w_bar, theta_bar, lbd)
+    return w_bar, theta_bar

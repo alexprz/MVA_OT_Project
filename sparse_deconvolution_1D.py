@@ -2,7 +2,6 @@
 import numpy as np
 
 
-
 class SparseDeconvolution():
     """Implement the sparse deconvolution example of the paper."""
 
@@ -11,10 +10,6 @@ class SparseDeconvolution():
 
         Args:
         -----
-            w_bar : np.array of shape (m,)
-                The ground truth weights
-            theta_bar : np.array of shape (m,)
-                The ground truth positions
             params : parameters.SD1Parameters object
 
         """
@@ -26,27 +21,6 @@ class SparseDeconvolution():
 
         self.x_min = 0
         self.x_max = 1
-
-# def spikes_1D(x, w, p):
-#     """1D weighted spikes.
-
-#     Args:
-#     -----
-#         x : float
-#         w : array of shape (m,)
-#             Weights of the spikes.
-#         p : array of shape (m,)
-#             Positions of the spikes.
-
-#     Returns:
-#     --------
-#         float
-
-#     """
-#     assert w.shape == p.shape
-#     assert len(w.shape) == 1
-
-#     return np.sum(w[p == x])
 
     def discretize(self):
         """Discretize space to compute the inegral.
@@ -272,11 +246,13 @@ def paper_ground_truth(m0):
 
     Args:
     -----
-        params : parameters.SD1Parameters object
+        m0 : int
+            Number of neurons in the ground truth
 
     Returns:
     --------
-        SparseDeconvolution object
+            w_bar : np.array of shape (m,)
+            theta_bar : np.array of shape (m,)
 
     """
     signs = 2*np.random.binomial(n=1, p=0.5, size=m0)-1  # weight signs

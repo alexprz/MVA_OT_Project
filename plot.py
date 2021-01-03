@@ -84,3 +84,60 @@ def plot_particle_flow_sd1(ws, thetas, params, ax=None):
         savefig(params, name='particle_flow')
 
     return ax
+
+
+def scatterplot(w, theta, ax, **kwargs):
+    """Scatter particles."""
+    x = w*theta[:, 0]
+    y = w*theta[:, 1]
+    ax.scatter(x, y, **kwargs)
+
+
+def lineplot(w, theta, ax, **kwargs):
+    """Draw lines between (0, 0) and particles."""
+    x = np.stack((np.zeros_like(w), w*theta[:, 0]), axis=0)
+    y = np.stack((np.zeros_like(w), w*theta[:, 1]), axis=0)
+    ax.plot(1e1*x, 1e1*y, **kwargs)
+
+
+def plot_particle_flow_tln(ws, thetas, params, ax=None):
+    """Plot the particle flow in two-layers network example.
+
+    Args:
+    -----
+        ws : np.array of shape (n_iter, m)
+        thetas : np.array of shape (n_iter, m)
+        params : parameters.BaseParameters object
+        ax : matplotlib ax
+
+    """
+    w_final, theta_final = ws[-1, ...], thetas[-1, ...]
+
+    # Plot ground truth
+    fig, ax = get_ax(ax)
+    scatterplot(params.w_bar, params.theta_bar, ax, marker='+', color='orange')
+    ax.set_xlabel(r'$\theta_1$')
+    ax.set_ylabel(r'$\theta_2$')
+    ax.set_title('Trajectories of the particles')
+
+    # Plot particle paths and start/end
+    scatterplot(params.w0, params.theta0, ax, color='blue', marker='.')
+    scatterplot(w_final, theta_final, ax, color='red', marker='.')
+    for k in range(params.m):
+        label = 'Flow' if k == 0 else ''
+        ax.plot(ws[:, k]*thetas[:, k, 0], ws[:, k]*thetas[:, k, 1], color='green', linewidth=.5, label=label)#, marker='o', markersize=1)
+
+    # Plot lines of optimal positions
+    x_min, x_max = ax.get_xlim()
+    y_min, y_max = ax.get_ylim()
+    lineplot(params.w_bar, params.theta_bar, ax, linestyle='--', color='black', label='Optimal positions')
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
+    ax.legend()
+    lineplot(w_final, theta_final, ax, linestyle=':', color='cyan')
+
+    if fig is not None:
+        plt.tight_layout()
+        savefig(params, name='particle_flow')
+
+    return ax
