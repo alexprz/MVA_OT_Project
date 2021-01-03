@@ -333,3 +333,64 @@ class XP21Params(TLNCommonParameters):
             **kwargs
         )
         self.name = 'XP2-1'
+
+
+class XP22Params(TLNCommonParameters):
+    """Implement the parameters for the experiment 2.2 (lambda influence)."""
+
+    def __init__(self, m, lbd, **kwargs):
+        """Init.
+
+        Args:
+        -----
+            m : int
+                Number of particles in the gradient flow
+
+        """
+        super().__init__(
+            m=m,
+            lbd=lbd,
+            **kwargs
+        )
+        self.name = 'XP2-2'
+
+
+class XP23Params(TLNCommonParameters):
+    """Implement the parameters for the experiment 2.3 (init influence)."""
+
+    def __init__(self, w0, theta0, name, **kwargs):
+        """Init.
+
+        Args:
+        -----
+            m : int
+                Number of particles in the gradient flow
+
+        """
+        super().__init__(
+            m=w0.shape[0],
+            w0=w0,
+            theta0=theta0,
+            **kwargs
+        )
+        self.name = 'XP2-3'
+        self.subname = name
+
+
+class XP24Params(TLNCommonParameters):
+    """Implement the parameters for the experiment 2.4 (Relu + logistic)."""
+
+    def __init__(self, m, **kwargs):
+        """Init.
+
+        Args:
+        -----
+            m : int
+                Number of particles in the gradient flow
+
+        """
+        super().__init__(
+            m=m,
+            **kwargs
+        )
+        self.name = 'XP2-4'
