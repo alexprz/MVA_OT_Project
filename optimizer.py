@@ -78,9 +78,21 @@ def forward_backward(env, print_every=None):
     return np.array(ws), np.array(thetas)
 
 
-def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
-    """Implement stochastic gradient descent for exemple 2."""
-    w, theta = np.copy(w0), np.copy(theta0)
+def SGD(env, print_every=None):
+    """Implement stochastic gradient descent for exemple 2.
+
+    Args:
+    -----
+        env : tln.TwoLayerNetwork object
+        print_every : int
+
+    Returns:
+    --------
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+
+    """
+    w, theta = np.copy(env.params.w0), np.copy(env.params.theta0)
     ws, thetas = [np.copy(w)], [np.copy(theta)]
 
     fms, norm_grad_fms = [], []
@@ -91,13 +103,12 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
     # Sample a batch
     # mean, cov = np.zeros(env.d), 1e4*np.eye(env.d)
     # x = np.random.multivariate_normal(mean, cov, size=bs)
-    x = np.random.normal(0, 1, size=(bs, env.d))
+    x = np.random.normal(0, 1, size=(env.params.sgd_bs, env.d))
     x /= norm(x, axis=1)[:, None]
 
-    for k in range(n_iter):
+    for k in range(env.params.sgd_n_iter):
         # Adjust step size
-        gamma = gamma0#/np.power(k+1, .51)
-
+        gamma = env.params.sgd_gamma  #/np.power(k+1, .51)
 
         # Compute the gradient over the batch
         grad_w, grad_theta = env.grad_fm(w, theta, x)
