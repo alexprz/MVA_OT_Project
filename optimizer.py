@@ -2,21 +2,15 @@
 import numpy as np
 from numpy.linalg import norm
 
-import sparse_deconvolution_1D as sd1
 
-
-def forward_backward_step(env, w, theta, gamma, lbd, n=1000):
+def forward_backward_step(env, w, theta):
     """Implement one step of the forward backward algo.
 
     Args:
     -----
-        env : Env named tuple
+        env : sd1.SparseDeconvolution object
         w : np.array of shape (m,)
         theta : np.array of shape (m, d)
-        gamma : float
-        lbd : float
-        n : int
-            Discretization for the integral computation
 
     Returns:
     --------
@@ -24,7 +18,12 @@ def forward_backward_step(env, w, theta, gamma, lbd, n=1000):
         theta : np.array of shape (m, d)
 
     """
-    x = np.linspace(env.x_min, env.x_max, n)
+    # Retrieve algorithm's parameters
+    gamma = env.params.fb_gamma/env.params.fb_nu
+    delta = 2 - gamma*env.params.fb_nu/2
+    lbd = env.params.fb_lbd*delta
+
+    x = env.discretize()
     grad_w, grad_theta = env.grad_R(w, theta, x)
 
     w_aux = w - gamma*grad_w
@@ -38,17 +37,12 @@ def forward_backward_step(env, w, theta, gamma, lbd, n=1000):
     return w, theta
 
 
-def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
+def forward_backward(env, print_every=None):
     """Implement the forward backward algorithm to minimize f.
 
     Args:
     -----
-        env : Env named tuple
-        w0 : np.array of shape (m,)
-        theta0 : np.array of shape (m, d)
-        max_iter : int
-        n : int
-            Discretization for the integral computation
+        env : sd1.SparseDeconvolution object
         print_every : int
 
     Returns:
@@ -57,27 +51,27 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
         theta : np.array of shape (m, d)
 
     """
-    w, theta = np.copy(w0), np.copy(theta0)
+    w, theta = np.copy(env.params.w0), np.copy(env.params.theta0)
     ws, thetas = [], []
 
     # Parameters of the algorithm
     # nu = 8e3/env.lbd  # gaussian
-    nu = 1/env.lbd
+    # nu = 1/env.params.lbd
     # nu = 5e2/env.lbd  # paper
-    gamma = 1/nu
-    delta = 2 - gamma*nu/2
-    lbd = 0.01*delta
+    # gamma = 1/nu
+    # delta = 2 - gamma*nu/2
+    # lbd = 0.01*delta
 
-    for k in range(max_iter):
-        w, theta = forward_backward_step(env, w, theta, gamma, lbd, n)
+    for k in range(env.params.n_iter):
+        w, theta = forward_backward_step(env, w, theta)
         ws.append(w)
         thetas.append(theta)
 
         # Check subgradient and objective value
         if print_every is not None and k % print_every == 0:
-            subgrad_w, subgrad_theta = sd1.subgrad_f_m(env, w, theta, n)
+            subgrad_w, subgrad_theta = env.subgrad_f_m(w, theta, env.params.n)
             e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
-            fm = sd1.f_m(env, w, theta, n)
+            fm = env.f_m(w, theta, env.params.n)
 
             print(f'iter {k}: \t e={e:.2e} \t fm={fm:.2e}')
 
