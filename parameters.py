@@ -81,8 +81,8 @@ class SD1CommonParameters(SD1Parameters):
         w_bar, theta_bar = sd1.paper_ground_truth(m0)
         super().__init__(
             m0=m0,
-            w0=np.zeros(m),
-            theta0=np.arange(m)/m,
+            w0=kwargs.get('w0', np.zeros(m)),
+            theta0=kwargs.get('theta0', np.arange(m)/m),
             w_bar=w_bar,
             theta_bar=theta_bar,
             lbd=lbd,
@@ -152,4 +152,26 @@ class XP13Params(SD1CommonParameters):
         super().__init__(
             m=m,
             lbd=lbd,
+        )
+
+
+class XP14Params(SD1CommonParameters):
+    """Implement the parameters for the experiment 1.4 (init influence)."""
+
+    def __init__(self, w0, theta0):
+        """Init.
+
+        Args:
+        -----
+            m : int
+                Number of particles in the gradient flow
+            sigma : float
+                Width of the Gaussian kernel
+
+        """
+        assert w0.shape[0] == theta0.shape[0]
+        super().__init__(
+            m=w0.shape[0],
+            w0=w0,
+            theta0=theta0,
         )
