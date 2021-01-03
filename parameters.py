@@ -16,7 +16,7 @@ class SD1Parameters(BaseParameters):
     """Store parameters for the sparse deconvolution example."""
 
     def __init__(self, m0, w0, theta0, lbd, kernel,
-                 n_iter, fb_gamma, fb_lbd, n):
+                 n_iter, fb_gamma, fb_lbd, fb_nu, n):
         """Init.
 
         Args:
@@ -36,6 +36,8 @@ class SD1Parameters(BaseParameters):
                 Parameter of the FB algo
             fb_lbd : float
                 Parameter of the FB algo
+            fb_nu : float
+                Parameter of the FB algo
             n : int
                 Discretization for the integral computation
 
@@ -48,6 +50,7 @@ class SD1Parameters(BaseParameters):
         self.kernel = kernel
         self.fb_gamma = fb_gamma
         self.fb_lbd = fb_lbd
+        self.fb_nu = fb_nu
         self.n = n
 
         assert isinstance(kernel, kernels.BaseKernel)
@@ -69,6 +72,8 @@ class SD1PaperParams(SD1Parameters):
                 Parameter of the FB algo
             fb_lbd : float
                 Parameter of the FB algo
+            fb_nu : float
+                Parameter of the FB algo
             n : int
                 Discretization for the integral computation
             order : int
@@ -84,6 +89,7 @@ class SD1PaperParams(SD1Parameters):
             n_iter=10000,
             fb_gamma=fb_gamma,
             fb_lbd=fb_lbd,
+            fb_nu=fb_nu,
             n=n
         )
 
@@ -104,6 +110,8 @@ class SD1GaussianParams(SD1Parameters):
                 Parameter of the FB algo
             fb_lbd : float
                 Parameter of the FB algo
+            fb_nu : float
+                Parameter of the FB algo
             sigma : float
                 Width of the Gaussian kernel
             n : int
@@ -119,5 +127,6 @@ class SD1GaussianParams(SD1Parameters):
             n_iter=10000,
             fb_gamma=fb_gamma,
             fb_lbd=fb_lbd,
+            fb_nu=fb_nu,
             n=n
         )
