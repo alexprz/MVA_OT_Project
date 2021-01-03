@@ -16,7 +16,7 @@ for m in [6, 10, 100]:
     TLN = tln.TwoLayerNN(params)
 
     # Apply the forward backward algorithm
-    ws, thetas, *_ = opt.SGD(TLN, print_every=1000)
+    ws, thetas, *_ = opt.SGD(TLN, print_every=100)
 
     # Dump arrays
     plot.dump(ws, thetas, params)

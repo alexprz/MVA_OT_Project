@@ -13,7 +13,7 @@ np.random.seed(0)
 m = 100
 for lbd in [1e6, 1e3, 1e1]:
     print(f'----------m={m}----------')
-    params = parameters.XP21Params(m=m, lbd=lbd)
+    params = parameters.XP22Params(m=m, lbd=lbd)
     TLN = tln.TwoLayerNN(params)
 
     # Apply the forward backward algorithm
