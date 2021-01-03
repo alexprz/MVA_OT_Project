@@ -1,74 +1,129 @@
 """Implement some kernels for the sparse deconvolution experiment."""
 import numpy as np
+from abc import ABC, abstractmethod
 
 
-def dirichlet_kernel(x, n):
-    """Dirichlet kernel of given order (2 pi periodic).
+class BaseKernel(ABC):
+    """Abstract class for kernels."""
 
-    Args:
-    -----
-        x : float
-        n : int
-            Kernel order.
+    def __call__(self, x):
+        """Shortcut to call the evaluate function."""
+        return self.evaluate(x)
 
-    Returns:
-    --------
-        float
+    @staticmethod
+    @abstractmethod
+    def evaluate(x):
+        """Implement the kernel."""
+        return
 
-    """
-    x = np.squeeze(np.array(x))
-    y = np.zeros(x.shape)
-    indeterminate = np.mod(x, 2*np.pi) == 0
-    y[indeterminate] = (2*n + 1)/(2*np.pi)
-    y[~indeterminate] = np.divide(
-        np.sin((n + .5)*x[~indeterminate]),
-        (2*np.pi*np.sin(x[~indeterminate]/2))
-    )
-    return y
+    @staticmethod
+    @abstractmethod
+    def derivative(x):
+        """Implement the derivative of the kernel."""
+        return
 
 
-def dirichlet_kernel_dx(x, n):
-    x = np.squeeze(np.array(x))
-    y = np.zeros(x.shape)
-    indeterminate = np.mod(x, 2*np.pi) == 0
-    y[indeterminate] = 0
+class DirichletKernel(BaseKernel):
+    """Implement dirichlet kernel of given order (2 pi periodic)."""
 
-    z = x[~indeterminate]
-    a = n + .5
-    b = .5
-    num = a*np.cos(a*z)*np.sin(b*z) - b*np.cos(b*z)*np.sin(a*z)
-    denom = np.power(np.sin(b*z), 2)
-    y[~indeterminate] = np.divide(num, denom)
-    return y
+    def __init__(self, n):
+        """Init.
+
+        Args:
+        -----
+            n : int
+                Order of the Dirichlet kernel.
+
+        """
+        assert isinstance(n, int)
+        self.n = n
+
+    def evaluate(self, x):
+        """Evaluate the kernel.
+
+        Args:
+        -----
+            x : np.array
+
+        Returns:
+        --------
+            Kx : np.array of same shape as input
+
+        """
+        x = np.squeeze(np.array(x))
+        y = np.zeros(x.shape)
+        indeterminate = np.mod(x, 2*np.pi) == 0
+        y[indeterminate] = (2*self.n + 1)/(2*np.pi)
+        y[~indeterminate] = np.divide(
+            np.sin((self.n + .5)*x[~indeterminate]),
+            (2*np.pi*np.sin(x[~indeterminate]/2))
+        )
+        return y
+
+    def derivative(self, x):
+        """Evaluate the derivative of the kernel.
+
+        Args:
+        -----
+            x : np.array
+
+        Returns:
+        --------
+            Kpx : np.array of same shape as input
+
+        """
+        x = np.squeeze(np.array(x))
+        y = np.zeros(x.shape)
+        indeterminate = np.mod(x, 2*np.pi) == 0
+        y[indeterminate] = 0
+
+        z = x[~indeterminate]
+        a = self.n + .5
+        b = .5
+        num = a*np.cos(a*z)*np.sin(b*z) - b*np.cos(b*z)*np.sin(a*z)
+        denom = np.power(np.sin(b*z), 2)
+        y[~indeterminate] = np.divide(num, denom)
+        return y
 
 
-def gaussian_kernel(x, sigma):
-    """Gaussian kernel.
+class GaussianKernel(BaseKernel):
+    """Implement the Gaussian kernel."""
 
-    Args:
-        x : float or np.array
-        sigma : float
+    def __init__(self, sigma):
+        """Init.
 
-    Returns:
-    --------
-        float or np.array
+        Args:
+        -----
+            sigma : float
+                Width of the gaussian kernel.
+        """
+        self.sigma = sigma
 
-    """
-    x = np.squeeze(x)
-    return np.exp(-.5*np.power(x, 2)/sigma**2)/(sigma*np.sqrt(2*np.pi))
+    def evaluate(self, x):
+        """Gaussian kernel.
 
+        Args:
+            x : float or np.array
 
-def gaussian_kernel_dx(x, sigma):
-    """Derivative of Gaussian kernel.
+        Returns:
+        --------
+            float or np.array
 
-    Args:
-        x : float or np.array
-        sigma : float
+        """
+        x = np.squeeze(x)
+        norm = (self.sigma*np.sqrt(2*np.pi))
+        return np.exp(-.5*np.power(x, 2)/self.sigma**2)/norm
 
-    Returns:
-    --------
-        float or np.array
+    def derivative(self, x):
+        """Evaluate the derivative of the Gaussian kernel.
 
-    """
-    x = np.squeeze(x)
-    return -2*x*gaussian_kernel(x, sigma)/sigma**2
+        Args:
+            x : float or np.array
+
+        Returns:
+        --------
+            float or np.array
+
+        """
+        x = np.squeeze(x)
+        return -2*x*self.evaluate(x)/self.sigma**2
