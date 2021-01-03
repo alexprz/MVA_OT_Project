@@ -7,7 +7,7 @@ import parameters
 class SparseDeconvolution():
     """Implement the sparse deconvolution example of the paper."""
 
-    def __init__(self, w_bar, theta_bar, params):
+    def __init__(self, params):
         """Init.
 
         Args:
@@ -22,8 +22,8 @@ class SparseDeconvolution():
         assert isinstance(params, parameters.SD1Parameters)
         self.params = params
         self.kernel = params.kernel
-        self.w_bar = w_bar
-        self.theta_bar = theta_bar
+        self.w_bar = params.w_bar
+        self.theta_bar = params.theta_bar
         self.lbd = params.lbd
 
         self.x_min = 0
@@ -269,7 +269,7 @@ class SparseDeconvolution():
         return grad_R[0] + subgrad_V[0], grad_R[1] + subgrad_V[1]
 
 
-def paper_env(params):
+def paper_ground_truth(m0):
     """Create a sparse deconvolution environment from parameters.
 
     Args:
@@ -281,8 +281,8 @@ def paper_env(params):
         SparseDeconvolution object
 
     """
-    signs = 2*np.random.binomial(n=1, p=0.5, size=params.m0)-1  # weight signs
-    w_bar = signs*np.random.uniform(0.5, 1.5, size=params.m0)  # weights
-    theta_bar = SparseDeconvolution.draw_positions_1D(params.m0)  # positions
+    signs = 2*np.random.binomial(n=1, p=0.5, size=m0)-1  # weight signs
+    w_bar = signs*np.random.uniform(0.5, 1.5, size=m0)  # weights
+    theta_bar = SparseDeconvolution.draw_positions_1D(m0)  # positions
 
-    return SparseDeconvolution(w_bar, theta_bar, params)
+    return w_bar, theta_bar
