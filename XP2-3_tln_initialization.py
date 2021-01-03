@@ -1,4 +1,4 @@
-"""Implement the sparse deconvolution experience of the paper."""
+"""Implement the experiment 2.3 (influence of initialization)."""
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -27,7 +27,8 @@ initializations = {
 
 for name, (w0, theta0) in initializations.items():
     print(f'----------{name}----------')
-    params = parameters.XP23Params(w0=w0, theta0=theta0, name=name, sgd_gamma=1e-2)
+    params = parameters.XP23Params(w0=w0, theta0=theta0, name=name,
+                                   sgd_gamma=1e-2)
     TLN = tln.TwoLayerNN(params)
 
     # Apply the forward backward algorithm

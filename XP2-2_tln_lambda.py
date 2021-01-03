@@ -1,4 +1,4 @@
-"""Implement the sparse deconvolution experience of the paper."""
+"""Implement the experiment 2.2 (influence of lambda)."""
 import numpy as np
 import matplotlib.pyplot as plt
 

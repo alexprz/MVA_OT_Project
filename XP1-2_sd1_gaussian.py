@@ -1,4 +1,4 @@
-"""Implement the sparse deconvolution experience of the paper."""
+"""Implement the experiment 1.2 (gaussian kernel)."""
 import numpy as np
 import matplotlib.pyplot as plt
 
