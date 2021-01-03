@@ -2,7 +2,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 
-import kernels
+from kernels import BaseKernel, DirichletKernel, GaussianKernel
 import sparse_deconvolution_1D as sd1
 
 
@@ -61,13 +61,13 @@ class SD1Parameters(BaseParameters):
         self.fb_nu = fb_nu
         self.n = n
 
-        assert isinstance(kernel, kernels.BaseKernel)
+        assert isinstance(kernel, BaseKernel)
 
 
 class SD1CommonParameters(SD1Parameters):
     """Store common parameters for the sparse deconvolution example."""
 
-    def __init__(self, m, kernel):
+    def __init__(self, m, **kwargs):
         """Init.
 
         Args:
@@ -77,7 +77,7 @@ class SD1CommonParameters(SD1Parameters):
         """
         np.random.seed(0)
         m0 = 5
-        lbd = 0.2
+        lbd = kwargs.get('lbd', 0.2)
         w_bar, theta_bar = sd1.paper_ground_truth(m0)
         super().__init__(
             m0=m0,
@@ -87,7 +87,7 @@ class SD1CommonParameters(SD1Parameters):
             theta_bar=theta_bar,
             lbd=lbd,
             n_iter=10000,
-            kernel=kernel,
+            kernel=kwargs.get('kernel', DirichletKernel(period=1, n=7)),
             fb_gamma=1,
             fb_lbd=0.01,
             fb_nu=1/lbd,
@@ -111,7 +111,7 @@ class XP11Params(SD1CommonParameters):
         """
         super().__init__(
             m=m,
-            kernel=kernels.DirichletKernel(period=1, n=order),
+            kernel=DirichletKernel(period=1, n=order),
         )
 
 
@@ -131,5 +131,25 @@ class XP12Params(SD1CommonParameters):
         """
         super().__init__(
             m=m,
-            kernel=kernels.GaussianKernel(sigma),
+            kernel=GaussianKernel(sigma),
+        )
+
+
+class XP13Params(SD1CommonParameters):
+    """Implement the parameters for the experiment 1.3 (lbd influence)."""
+
+    def __init__(self, m, lbd):
+        """Init.
+
+        Args:
+        -----
+            m : int
+                Number of particles in the gradient flow
+            sigma : float
+                Width of the Gaussian kernel
+
+        """
+        super().__init__(
+            m=m,
+            lbd=lbd,
         )
