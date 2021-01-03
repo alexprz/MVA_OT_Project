@@ -22,7 +22,7 @@ for m in [6, 10, 100]:
     plot.dump(ws, thetas, params)
 
     # Plot particle flow
-    plot.plot_particle_flow_sd1(ws, thetas, params)
+    plot.plot_particle_flow_tln(ws, thetas, params)
 
 plt.tight_layout()
 plt.show()
