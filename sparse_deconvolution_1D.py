@@ -50,6 +50,21 @@ class SparseDeconvolution():
 
 #     return np.sum(w[p == x])
 
+    def discretize(self):
+        """Discretize space to compute the inegral.
+
+        Args:
+        -----
+            n : int
+                Number of points
+
+        Returns:
+        --------
+            np.array of shape (n,)
+
+        """
+        return np.linspace(self.x_min, self.x_max, self.params.n)
+
     @staticmethod
     def draw_positions_1D(m):
         """Draw positions in (0, 1) with a minimum separaton of 0.1.
