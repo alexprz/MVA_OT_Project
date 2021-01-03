@@ -114,9 +114,9 @@ class SD1CommonParameters(SD1Parameters):
             lbd=lbd,
             n_iter=10000,
             kernel=kwargs.get('kernel', DirichletKernel(period=1, n=7)),
-            fb_gamma=1,
-            fb_lbd=0.01,
-            fb_nu=1/lbd,
+            fb_gamma=kwargs.get('fb_gamma', 1),
+            fb_lbd=kwargs.get('fb_lbd', 0.01),
+            fb_nu=kwargs.get('fb_nu', 1/lbd),
             n=100,
         )
 
@@ -124,7 +124,7 @@ class SD1CommonParameters(SD1Parameters):
 class XP11Params(SD1CommonParameters):
     """Implement the parameters for the experiment 1.1 (Dirichlet kernel)."""
 
-    def __init__(self, m, order):
+    def __init__(self, m, order, **kwargs):
         """Init.
 
         Args:
@@ -138,6 +138,7 @@ class XP11Params(SD1CommonParameters):
         super().__init__(
             m=m,
             kernel=DirichletKernel(period=1, n=order),
+            **kwargs
         )
         self.name = 'XP1-1'
 
@@ -145,7 +146,7 @@ class XP11Params(SD1CommonParameters):
 class XP12Params(SD1CommonParameters):
     """Implement the parameters for the experiment 1.2 (Gaussian kernel)."""
 
-    def __init__(self, m, sigma):
+    def __init__(self, m, sigma, **kwargs):
         """Init.
 
         Args:
@@ -159,6 +160,7 @@ class XP12Params(SD1CommonParameters):
         super().__init__(
             m=m,
             kernel=GaussianKernel(sigma),
+            **kwargs
         )
         self.name = 'XP1-2'
 
@@ -166,7 +168,7 @@ class XP12Params(SD1CommonParameters):
 class XP13Params(SD1CommonParameters):
     """Implement the parameters for the experiment 1.3 (lbd influence)."""
 
-    def __init__(self, m, lbd):
+    def __init__(self, m, lbd, **kwargs):
         """Init.
 
         Args:
@@ -180,6 +182,7 @@ class XP13Params(SD1CommonParameters):
         super().__init__(
             m=m,
             lbd=lbd,
+            **kwargs
         )
         self.name = 'XP1-3'
 
@@ -187,7 +190,7 @@ class XP13Params(SD1CommonParameters):
 class XP14Params(SD1CommonParameters):
     """Implement the parameters for the experiment 1.4 (init influence)."""
 
-    def __init__(self, w0, theta0, name):
+    def __init__(self, w0, theta0, name, **kwargs):
         """Init.
 
         Args:
@@ -203,6 +206,7 @@ class XP14Params(SD1CommonParameters):
             m=w0.shape[0],
             w0=w0,
             theta0=theta0,
+            **kwargs
         )
         self.name = 'XP1-4'
         self.subname = name

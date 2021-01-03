@@ -34,11 +34,11 @@ def dump(ws, thetas, params):
     thetas.dump(f'{folder}thetas{params}.pickle')
 
 
-def savefig(params):
+def savefig(params, name=''):
     """Save current fig in pdf and jpg."""
     folder = get_XP_folder(params)
-    plt.savefig(f'{folder}{params}.pdf')
-    plt.savefig(f'{folder}{params}.jpg')
+    plt.savefig(f'{folder}{name}{params}.pdf')
+    plt.savefig(f'{folder}{name}{params}.jpg')
 
 
 def plot_particle_flow_sd1(ws, thetas, params, ax=None):
@@ -81,6 +81,6 @@ def plot_particle_flow_sd1(ws, thetas, params, ax=None):
 
     if fig is not None:
         plt.tight_layout()
-        savefig(params)
+        savefig(params, name='particle_flow')
 
     return ax
