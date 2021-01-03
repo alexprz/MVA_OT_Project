@@ -64,7 +64,7 @@ class DirichletKernel(BaseKernel):
             Kx : np.array of same shape as input
 
         """
-        return self._dirichlet(2*np.pi/np.period*x)
+        return self._dirichlet(2*np.pi/self.period*x)
 
     def _dirichlet_derivative(self, x):
         x = np.squeeze(np.array(x))
@@ -92,7 +92,7 @@ class DirichletKernel(BaseKernel):
             Kpx : np.array of same shape as input
 
         """
-        return self._dirichlet_derivative(2*np.pi/np.period*x)
+        return self._dirichlet_derivative(2*np.pi/self.period*x)
 
 
 class GaussianKernel(BaseKernel):
