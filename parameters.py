@@ -10,6 +10,12 @@ class BaseParameters(ABC):
     """Abstract class for parameters classes."""
 
     def __str__(self):
+        """Give a str representation of the parameters."""
+        return ''.join([f'-{k}_{v}' for k, v in self.state_dict().items()])
+
+    @abstractmethod
+    def state_dict(self):
+        """Create a dict storing parameters."""
         return
 
 
@@ -61,7 +67,23 @@ class SD1Parameters(BaseParameters):
         self.fb_nu = fb_nu
         self.n = n
 
+        self.folder = None
+
         assert isinstance(kernel, BaseKernel)
+
+    def state_dict(self):
+        """Create a dict storing parameters."""
+        return {
+            'm0': self.m0,
+            'm': self.m,
+            'lbd': self.lbd,
+            'n_iter': self.n_iter,
+            'kernel': self.kernel,
+            'fb_gamma': self.fb_gamma,
+            'fb_lbd': self.fb_lbd,
+            'fb_nu': self.fb_nu,
+            'n': self.n,
+        }
 
 
 class SD1CommonParameters(SD1Parameters):
@@ -113,6 +135,7 @@ class XP11Params(SD1CommonParameters):
             m=m,
             kernel=DirichletKernel(period=1, n=order),
         )
+        self.name = 'XP1-1'
 
 
 class XP12Params(SD1CommonParameters):
@@ -133,6 +156,7 @@ class XP12Params(SD1CommonParameters):
             m=m,
             kernel=GaussianKernel(sigma),
         )
+        self.name = 'XP1-2'
 
 
 class XP13Params(SD1CommonParameters):
@@ -153,6 +177,7 @@ class XP13Params(SD1CommonParameters):
             m=m,
             lbd=lbd,
         )
+        self.name = 'XP1-3'
 
 
 class XP14Params(SD1CommonParameters):
@@ -175,3 +200,4 @@ class XP14Params(SD1CommonParameters):
             w0=w0,
             theta0=theta0,
         )
+        self.name = 'XP1-4'

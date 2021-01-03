@@ -10,6 +10,10 @@ class BaseKernel(ABC):
         """Shortcut to call the evaluate function."""
         return self.evaluate(x)
 
+    def __str__(self):
+        """Give a str representation of the parameters."""
+        return ''.join([f'-{k}_{v}' for k, v in self.state_dict().items()])
+
     @staticmethod
     @abstractmethod
     def evaluate(x):
@@ -20,6 +24,11 @@ class BaseKernel(ABC):
     @abstractmethod
     def derivative(x):
         """Implement the derivative of the kernel."""
+        return
+
+    @abstractmethod
+    def state_dict(self):
+        """Create a dict storing parameters."""
         return
 
 
@@ -40,6 +49,13 @@ class DirichletKernel(BaseKernel):
         assert isinstance(n, int)
         self.n = n
         self.period = period
+
+    def state_dict(self):
+        """Create a dict storing parameters."""
+        return {
+            'order': self.n,
+            'period': self.period,
+        }
 
     def _dirichlet(self, x):
         x = np.squeeze(np.array(x))
@@ -107,6 +123,12 @@ class GaussianKernel(BaseKernel):
                 Width of the gaussian kernel.
         """
         self.sigma = sigma
+
+    def state_dict(self):
+        """Create a dict storing parameters."""
+        return {
+            'sigma': self.sigma,
+        }
 
     def evaluate(self, x):
         """Gaussian kernel.
