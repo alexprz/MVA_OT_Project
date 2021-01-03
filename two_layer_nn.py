@@ -41,7 +41,8 @@ class TwoLayerNN():
     @property
     def d(self):
         """Dimension of the input samples."""
-        return self.theta_bar.shape[1] - 1
+        # return self.theta_bar.shape[1] - 1
+        return self.theta_bar.shape[1]
 
     def layer1(self, theta, x, use_derivative=False):
         """Implement the first layer (the hidden layer) of the paper.
@@ -59,8 +60,8 @@ class TwoLayerNN():
 
         """
         act = self.activation.derivative if use_derivative else self.activation
-        x = x.reshape(-1, 1) if x.ndim == 1 else x
-        x = np.concatenate((x, np.ones((x.shape[0], 1))), axis=1)
+        # x = x.reshape(-1, 1) if x.ndim == 1 else x
+        # x = np.concatenate((x, np.ones((x.shape[0], 1))), axis=1)
         return act(np.inner(x, theta))
 
     def layer2(self, w, theta, x):
@@ -159,14 +160,19 @@ class TwoLayerNN():
 
         """
         d1 = self._phi_dtheta1(w, theta, x)
-        d2 = self._phi_dtheta2(w, theta, x)[:, :, None]
-        return np.concatenate((d1, d2), axis=2)
+        # d2 = self._phi_dtheta2(w, theta, x)[:, :, None]
+
+        # print('d1', d1.shape)
+        # print('d2', d2.shape)
+        # return np.concatenate((d1, d2), axis=2)
+        return d1
 
     def to_class(self, y):
-        y_class = np.copy(y)
-        y_class[y >= self.y_bar_mean] = 1
-        y_class[y < self.y_bar_mean] = -1
-        return y_class
+        return y
+        # y_class = np.copy(y)
+        # y_class[y >= self.y_bar_mean] = 1
+        # y_class[y < self.y_bar_mean] = -1
+        # return y_class
 
     def y(self, w, theta, x):
         """Implement the output function.
@@ -199,6 +205,41 @@ class TwoLayerNN():
         # return self.layer2(self.w_bar, self.theta_bar, x)
         return self.y(self.w_bar, self.theta_bar, x)
 
+    # def Vm(self, w, theta):
+    #     """Implement the second layer of the paper.
+
+    #     Args:
+    #     -----
+    #         w : np.array of shape (m,)
+    #         theta : np.array of shape (m, d)
+
+    #     Returns:
+    #     --------
+    #         float
+
+    #     """
+    #     return self.beta*np.abs(w).mean().item()
+
+    # def subgrad_Vm(self, w, theta):
+    #     """Return a subgradient of V.
+
+    #     Args:
+    #     -----
+    #         w : np.array of shape (m,)
+    #         theta : np.array of shape (m,)
+
+    #     Returns:
+    #     --------
+    #         subgrad_w : np.array of shape (m,)
+    #         subgrad_theta : np.array of shape (m, d)
+
+    #     """
+    #     m = w.shape[0]
+    #     subgrad_w = self.beta*np.sign(w)/m
+    #     subgrad_theta = self.beta*np.zeros_like(theta)/m
+
+    #     return subgrad_w, subgrad_theta
+
     def Vm(self, w, theta):
         """Implement the second layer of the paper.
 
@@ -212,7 +253,8 @@ class TwoLayerNN():
             float
 
         """
-        return self.beta*np.abs(w).mean().item()
+        m = theta.shape[0]
+        return self.beta*(np.linalg.norm(w)**2 + np.linalg.norm(theta)**2)/m
 
     def subgrad_Vm(self, w, theta):
         """Return a subgradient of V.
@@ -229,8 +271,8 @@ class TwoLayerNN():
 
         """
         m = w.shape[0]
-        subgrad_w = self.beta*np.sign(w)/m
-        subgrad_theta = self.beta*np.zeros_like(theta)/m
+        subgrad_w = 2*self.beta*w/m
+        subgrad_theta = 2*self.beta*theta/m
 
         return subgrad_w, subgrad_theta
 
@@ -337,3 +379,18 @@ def paper_env(m0, activation, loss, beta):
     theta_bar = np.random.multivariate_normal(mean, cov, size=m0)
 
     return TwoLayerNN(activation, loss, w_bar, theta_bar, beta)
+
+
+def his_code_env(m0=3, lbd=2e-3):
+    d = 2
+
+    # Generate ground truth
+    w_bar = np.sign(np.random.normal(0, 1, size=m0))
+    # mean, cov = np.zeros(d-1), np.eye(d-1)
+    # theta_bar = np.random.multivariate_normal(mean, cov, size=m0)
+    theta_bar = np.random.normal(0, 1, size=(m0, d))
+
+    # Normalize
+    theta_bar /= np.linalg.norm(theta_bar, axis=1)[:, None]
+
+    return TwoLayerNN(activations.ReLU(), losses.Logistic(), w_bar, theta_bar, lbd)

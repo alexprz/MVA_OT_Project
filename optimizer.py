@@ -95,8 +95,10 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
     m = w.shape[0]
 
     # Sample a batch
-    mean, cov = np.zeros(env.d), 1e4*np.eye(env.d)
-    x = np.random.multivariate_normal(mean, cov, size=bs)
+    # mean, cov = np.zeros(env.d), 1e4*np.eye(env.d)
+    # x = np.random.multivariate_normal(mean, cov, size=bs)
+    x = np.random.normal(0, 1, size=(bs, env.d))
+    x /= norm(x, axis=1)[:, None]
 
     for k in range(n_iter):
         # Adjust step size
@@ -131,7 +133,7 @@ def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
         norm_grad_fms.append(e)
 
         if print_every is not None and (k == 0 or (k+1) % print_every == 0):
-            print(f'iter {k+1}: \t |∇w|={e_w:.2e} \t |∇θ|={e_theta:.2e} \t fm={fm:.2e} \t |∇fm|={e:.2e}')
+            print(f'iter {k+1}: \t |∇w|={e_w:.2e} \t |∇θ|={e_theta:.2e} \t fm={fm:.3e} \t |∇fm|={e:.2e}')
 
     ws = np.array(ws)
     thetas = np.array(thetas)
