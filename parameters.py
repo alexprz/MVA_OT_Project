@@ -15,7 +15,7 @@ class BaseParameters(ABC):
 class SD1Parameters(BaseParameters):
     """Store parameters for the sparse deconvolution example."""
 
-    def __init__(self, m0, w0, theta0, lbd, kernel,
+    def __init__(self, m0, w0, theta0, w_bar, theta_bar, lbd, kernel,
                  n_iter, fb_gamma, fb_lbd, fb_nu, n):
         """Init.
 
@@ -24,8 +24,12 @@ class SD1Parameters(BaseParameters):
             m0 : int
                 Number of particles in the ground truth
             w0 : np.array of shape (m,)
-                Groud truth weights
+                Initial weights
             theta0 : np.array of shape (m,)
+                Initial positions
+            w_bar : np.array of shape (m,)
+                Groud truth weights
+            theta_bar : np.array of shape (m,)
                 Groud truth positions
             lbd : float
                 Objective parameter
@@ -43,8 +47,11 @@ class SD1Parameters(BaseParameters):
 
         """
         self.m0 = m0
+        self.m = w0.shape[0]
         self.w0 = w0
         self.theta0 = theta0
+        self.w_bar = w_bar
+        self.theta_bar = theta_bar
         self.lbd = lbd
         self.n_iter = n_iter
         self.kernel = kernel
@@ -59,7 +66,7 @@ class SD1Parameters(BaseParameters):
 class SD1PaperParams(SD1Parameters):
     """Implement the parameters of the paper for sparse deconvolution."""
 
-    def __init__(self, m, lbd, fb_gamma, fb_lbd, n, order=7):
+    def __init__(self, m, w_bar, theta_bar, lbd, fb_gamma, fb_lbd, fb_nu, n, order=7):
         """Init.
 
         Args:
@@ -84,6 +91,8 @@ class SD1PaperParams(SD1Parameters):
             m0=5,
             w0=np.zeros(m),
             theta0=np.arange(m)/m,
+            w_bar=w_bar,
+            theta_bar=theta_bar,
             lbd=lbd,
             kernel=kernels.DirichletKernel(period=1, n=order),
             n_iter=10000,
@@ -97,7 +106,7 @@ class SD1PaperParams(SD1Parameters):
 class SD1GaussianParams(SD1Parameters):
     """Implement custom parameters with gaussian for sparse deconvolution."""
 
-    def __init__(self, m, lbd, fb_gamma, fb_lbd, sigma, n):
+    def __init__(self, m, w_bar, theta_bar, lbd, fb_gamma, fb_lbd, fb_nu, sigma, n):
         """Init.
 
         Args:
@@ -122,6 +131,8 @@ class SD1GaussianParams(SD1Parameters):
             m0=5,
             w0=np.zeros(m),
             theta0=np.arange(m)/m,
+            w_bar=w_bar,
+            theta_bar=theta_bar,
             lbd=lbd,
             kernel=kernels.GaussianKernel(sigma),
             n_iter=10000,
