@@ -26,17 +26,31 @@ class BaseKernel(ABC):
 class DirichletKernel(BaseKernel):
     """Implement dirichlet kernel of given order (2 pi periodic)."""
 
-    def __init__(self, n):
+    def __init__(self, period, n):
         """Init.
 
         Args:
         -----
             n : int
                 Order of the Dirichlet kernel.
+            period : float
+                Period of the Dirichlet kernel.
 
         """
         assert isinstance(n, int)
         self.n = n
+        self.period = period
+
+    def _dirichlet(self, x):
+        x = np.squeeze(np.array(x))
+        y = np.zeros(x.shape)
+        indeterminate = np.mod(x, 2*np.pi) == 0
+        y[indeterminate] = (2*self.n + 1)/(2*np.pi)
+        y[~indeterminate] = np.divide(
+            np.sin((self.n + .5)*x[~indeterminate]),
+            (2*np.pi*np.sin(x[~indeterminate]/2))
+        )
+        return y
 
     def evaluate(self, x):
         """Evaluate the kernel.
@@ -50,14 +64,20 @@ class DirichletKernel(BaseKernel):
             Kx : np.array of same shape as input
 
         """
+        return self._dirichlet(2*np.pi/np.period*x)
+
+    def _dirichlet_derivative(self, x):
         x = np.squeeze(np.array(x))
         y = np.zeros(x.shape)
         indeterminate = np.mod(x, 2*np.pi) == 0
-        y[indeterminate] = (2*self.n + 1)/(2*np.pi)
-        y[~indeterminate] = np.divide(
-            np.sin((self.n + .5)*x[~indeterminate]),
-            (2*np.pi*np.sin(x[~indeterminate]/2))
-        )
+        y[indeterminate] = 0
+
+        z = x[~indeterminate]
+        a = self.n + .5
+        b = .5
+        num = a*np.cos(a*z)*np.sin(b*z) - b*np.cos(b*z)*np.sin(a*z)
+        denom = np.power(np.sin(b*z), 2)
+        y[~indeterminate] = np.divide(num, denom)
         return y
 
     def derivative(self, x):
@@ -72,18 +92,7 @@ class DirichletKernel(BaseKernel):
             Kpx : np.array of same shape as input
 
         """
-        x = np.squeeze(np.array(x))
-        y = np.zeros(x.shape)
-        indeterminate = np.mod(x, 2*np.pi) == 0
-        y[indeterminate] = 0
-
-        z = x[~indeterminate]
-        a = self.n + .5
-        b = .5
-        num = a*np.cos(a*z)*np.sin(b*z) - b*np.cos(b*z)*np.sin(a*z)
-        denom = np.power(np.sin(b*z), 2)
-        y[~indeterminate] = np.divide(num, denom)
-        return y
+        return self._dirichlet_derivative(2*np.pi/np.period*x)
 
 
 class GaussianKernel(BaseKernel):
