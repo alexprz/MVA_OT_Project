@@ -184,6 +184,54 @@ def phi(w, theta, x, psi):
     return w[:, None]*psi(x[None, :, :] - theta[:, None, :])
 
 
+def f_m(env, w, theta, n=1000):
+    """Implement the discretized objective function F.
+
+    Args:
+    -----
+        env : Env named tuple
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+        n : int
+            Discretization for the integral computation
+
+    Returns:
+    --------
+        float
+
+    """
+    if env.x_min.ndim == 1:
+        x = np.linspace(0, 1, n)
+    else:
+        raise NotImplementedError('Add case ndim > 1')
+
+    fm = env.R(env.phi(w, theta, x).mean(axis=0)) + env.V(w, theta).mean()
+    return fm.item()
+
+
+def subgrad_f_m(env, w, theta, n=1000):
+    """Evaluate a subgradient of the objective f_m.
+
+    Args:
+    -----
+        env : Env named tuple
+        w : np.array of shape (m,)
+        theta : np.array of shape (m, d)
+        n : int
+            Discretization for the integral computation
+
+    Returns:
+    --------
+        subgrad_w : np.array of shape (m,)
+        subgrad_theta : np.array of shape (m, d)
+
+    """
+    x = np.linspace(env.x_min, env.x_max, n)
+    grad_R = env.grad_R(w, theta, x)
+    subgrad_V = env.subgrad_V(w, theta)
+    return grad_R[0] + subgrad_V[0], grad_R[1] + subgrad_V[1]
+
+
 def paper_env(m0):
     """Create the same environment as in the paper for sparse deconvolution.
 

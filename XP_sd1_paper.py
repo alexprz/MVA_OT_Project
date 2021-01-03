@@ -25,8 +25,8 @@ env = sd1.paper_env(m0)
 m = 20  # Number of particles
 w0 = np.zeros(m)  # Weights
 theta0 = np.arange(m)/m  # Positions (uniformly spaced)
-n = 50  # Discretization (for integral computation)
-max_iter = 1000000
+n = 100  # Discretization (for integral computation)
+max_iter = 10000
 
 # Apply the forward backward algorithm
 ws, thetas = opt.forward_backward(env, w0, theta0, max_iter=max_iter, n=n,

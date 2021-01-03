@@ -5,6 +5,7 @@ from hypothesis import strategies as strats
 from hypothesis import given
 
 import sparse_deconvolution_1D as sd1
+import two_layers_nn as tln
 import optimizer as opt
 
 
@@ -13,6 +14,12 @@ def env(draw):
     seed = draw(strats.integers(0, 2**32 - 1))
     np.random.seed(seed)
     return sd1.paper_env(5)
+
+@strats.composite
+def NNenv(draw):
+    seed = draw(strats.integers(0, 2**32 - 1))
+    np.random.seed(seed)
+    return tln.paper_env(4, sigma_name='relu', loss_name='squared')
 
 
 class TestSparseDeconvolution(unittest.TestCase):
@@ -128,3 +135,89 @@ class TestFrowardBackward(unittest.TestCase):
 
         assert w.shape == (max_iter, w0.shape[0])
         assert theta.shape == (max_iter, theta0.shape[0])
+
+
+class Test2LNN(unittest.TestCase):
+    """Test the two-layer neural network example."""
+
+    def setUp(self):
+        self.m = 10
+        self.d = 2
+        self.n = 5
+
+    @given(env=NNenv())
+    def test_w(self, env):
+        assert env.w_bar.shape == (4,)
+
+    @given(env=NNenv())
+    def test_theta(self, env):
+        assert env.theta_bar.shape == (4, 2)
+
+    @given(env=NNenv())
+    def test_layer1(self, env):
+        theta = np.ones((self.m, self.d))
+        x = np.ones((self.n, self.d-1))
+        r = tln.layer1(theta, x, env.sigma)
+
+        assert r.shape == (self.n, self.m)
+
+    @given(env=NNenv())
+    def test_layer2(self, env):
+        w = np.ones(self.m)
+        theta = np.ones((self.m, self.d))
+        x = np.ones((self.n, self.d-1))
+        r = tln.layer2(w, theta, x, env.sigma)
+
+        assert r.shape == (self.n,)
+
+    @given(env=NNenv())
+    def test_phi(self, env):
+        w = np.ones(self.m)
+        theta = np.ones((self.m, self.d))
+        x = np.ones((self.n, self.d-1))
+        r = tln.phi(w, theta, x, env.sigma)
+
+        assert r.shape == (self.n, self.m)
+
+    @given(env=NNenv())
+    def test_phi_dw(self, env):
+        theta = np.ones((self.m, self.d))
+        x = np.ones((self.n, self.d-1))
+        r = tln.phi_dw(theta, x, env.sigma)
+
+        assert r.shape == (self.n, self.m)
+
+    @given(env=NNenv())
+    def test_phi_dtheta1(self, env):
+        w = np.ones(self.m)
+        theta = np.ones((self.m, self.d))
+        x = np.ones((self.n, self.d-1))
+        r = tln.phi_dtheta1(w, theta, x, env.sigma)
+
+        assert r.shape == (self.n, self.m, self.d-1)
+
+    @given(env=NNenv())
+    def test_phi_dtheta2(self, env):
+        w = np.ones(self.m)
+        theta = np.ones((self.m, self.d))
+        x = np.ones((self.n, self.d-1))
+        r = tln.phi_dtheta2(w, theta, x, env.sigma)
+
+        assert r.shape == (self.n, self.m)
+
+    @given(env=NNenv())
+    def test_y(self, env):
+        w = np.ones(self.m)
+        theta = np.ones((self.m, self.d))
+        x = np.ones((self.n, self.d-1))
+        r = tln.y(w, theta, x, env.sigma)
+
+        assert r.shape == (self.n,)
+
+    @given(env=NNenv())
+    def test_V(self, env):
+        w = np.ones(self.m)
+        theta = np.ones((self.m, self.d))
+        r = tln.V(w, theta)
+
+        assert r.shape == (self.m,)
