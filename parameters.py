@@ -64,7 +64,7 @@ class SD1Parameters(BaseParameters):
         assert isinstance(kernel, kernels.BaseKernel)
 
 
-class SD1CommonParameters(BaseParameters):
+class SD1CommonParameters(SD1Parameters):
     """Store common parameters for the sparse deconvolution example."""
 
     def __init__(self, m, kernel):
@@ -115,7 +115,7 @@ class XP11Params(SD1CommonParameters):
         )
 
 
-class XP12Params(SD1Parameters):
+class XP12Params(SD1CommonParameters):
     """Implement the parameters for the experiment 1.2 (Gaussian kernel)."""
 
     def __init__(self, m, sigma):
