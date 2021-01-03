@@ -1,53 +1,8 @@
 """Implement the optimizers that minimizes F."""
 import numpy as np
+from numpy.linalg import norm
 
-
-def f_m(env, w, theta, n=1000):
-    """Implement the discretized objective function F.
-
-    Args:
-    -----
-        env : Env named tuple
-        w : np.array of shape (m,)
-        theta : np.array of shape (m, d)
-        n : int
-            Discretization for the integral computation
-
-    Returns:
-    --------
-        float
-
-    """
-    if env.x_min.ndim == 1:
-        x = np.linspace(0, 1, n)
-    else:
-        raise NotImplementedError('Add case ndim > 1')
-
-    fm = env.R(env.phi(w, theta, x).mean(axis=0)) + env.V(w, theta).mean()
-    return fm.item()
-
-
-def subgrad_f_m(env, w, theta, n=1000):
-    """Evaluate a subgradient of the objective f_m.
-
-    Args:
-    -----
-        env : Env named tuple
-        w : np.array of shape (m,)
-        theta : np.array of shape (m, d)
-        n : int
-            Discretization for the integral computation
-
-    Returns:
-    --------
-        subgrad_w : np.array of shape (m,)
-        subgrad_theta : np.array of shape (m, d)
-
-    """
-    x = np.linspace(env.x_min, env.x_max, n)
-    grad_R = env.grad_R(w, theta, x)
-    subgrad_V = env.subgrad_V(w, theta)
-    return grad_R[0] + subgrad_V[0], grad_R[1] + subgrad_V[1]
+import sparse_deconvolution_1D as sd1
 
 
 def forward_backward_step(env, w, theta, gamma, lbd, n=1000):
@@ -120,9 +75,9 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
 
         # Check subgradient and objective value
         if print_every is not None and k % print_every == 0:
-            subgrad_w, subgrad_theta = subgrad_f_m(env, w, theta, n)
+            subgrad_w, subgrad_theta = sd1.subgrad_f_m(env, w, theta, n)
             e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
-            fm = f_m(env, w, theta, n)
+            fm = sd1.f_m(env, w, theta, n)
 
             print(f'iter {k}: \t e={e:.2e} \t fm={fm:.2e}')
 
@@ -130,40 +85,62 @@ def forward_backward(env, w0, theta0, max_iter, n=1000, print_every=None):
 
 
 def SGD(env, w0, theta0, bs, n_iter, gamma0, print_every=None):
+    """Implement stochastic gradient descent for exemple 2."""
     w, theta = np.copy(w0), np.copy(theta0)
     ws, thetas = [np.copy(w)], [np.copy(theta)]
+
+    fms, norm_grad_fms = [], []
+    Rms, Vms = [], []
+    norm_grad_Rms, norm_grad_Vms = [], []
     m = w.shape[0]
 
+    # Sample a batch
+    # mean, cov = np.zeros(env.d), 1e4*np.eye(env.d)
+    # x = np.random.multivariate_normal(mean, cov, size=bs)
+    x = np.random.normal(0, 1, size=(bs, env.d))
+    x /= norm(x, axis=1)[:, None]
+
     for k in range(n_iter):
-        # Sample a batch
-        mean, cov = np.zeros(env.d), np.eye(env.d)
-        x = np.random.multivariate_normal(mean, cov, size=bs)
+        # Adjust step size
+        gamma = gamma0#/np.power(k+1, .51)
 
-        # Forward pass
-        y_hat = env.forward(w, theta, x)
-        loss = env.loss(y_hat, env.y(x))
-        loss_d = env.loss_d1(y_hat, env.y(x))
 
-        grad_w = env.phi_dw(w, theta, x)*loss_d[:, None]/m + env.V_dw(w, theta)/m
-        grad_theta = env.phi_dtheta(w, theta, x)*loss_d[:, None, None]/m + env.V_dtheta(w, theta)/m
+        # Compute the gradient over the batch
+        grad_w, grad_theta = env.grad_fm(w, theta, x)
 
-        # Approx the expectancy by Monte Carlo
-        grad_w = grad_w.mean(axis=0)
-        grad_theta = grad_theta.mean(axis=0)
-
-        gamma = gamma0/np.power(k+1, .75)
-
+        # Update point
         w -= m*gamma*grad_w
         theta -= m*gamma*grad_theta
 
         ws.append(np.copy(w))
         thetas.append(np.copy(theta))
 
-        if print_every is not None and k % print_every == 0:
-            e_w = np.linalg.norm(grad_w)
-            e_theta = np.linalg.norm(grad_theta)
-            print(f'iter {k+1}: \t ∇w={e_w:.2e} \t ∇θ={e_theta:.2e} \t loss={loss.mean():.2e} \t loss_d={loss_d.mean():.2e}')
+        # Check new objective
+        fm = env.fm(w, theta, x)
+        fms.append(fm)
+        Rm = env.Rm(w, theta, x)
+        Rms.append(Rm)
+        Vm = env.Vm(w, theta)
+        Vms.append(Vm)
+        grad_w_rm, grad_theta_rm = env.grad_Rm(w, theta, x)
+        grad_w_vm, grad_theta_vm = env.subgrad_Vm(w, theta)
+        norm_grad_Rms.append(norm(grad_w_rm) + norm(grad_theta_rm))
+        norm_grad_Vms.append(norm(grad_w_vm) + norm(grad_theta_vm))
 
-    return np.array(ws), np.array(thetas)
+        e_w = norm(grad_w)
+        e_theta = norm(grad_theta)
+        e = e_w + e_theta
+        norm_grad_fms.append(e)
 
+        if print_every is not None and (k == 0 or (k+1) % print_every == 0):
+            print(f'iter {k+1}: \t |∇w|={e_w:.2e} \t |∇θ|={e_theta:.2e} \t fm={fm:.3e} \t |∇fm|={e:.2e}')
 
+    ws = np.array(ws)
+    thetas = np.array(thetas)
+    fms = np.array(fms)
+    norm_grad_fms = np.array(norm_grad_fms)
+    Rms = np.array(Rms)
+    Vms = np.array(Vms)
+    norm_grad_Rms = np.array(norm_grad_Rms)
+    norm_grad_Vms = np.array(norm_grad_Vms)
+    return ws, thetas, fms, norm_grad_fms, Rms, Vms, norm_grad_Rms, norm_grad_Vms

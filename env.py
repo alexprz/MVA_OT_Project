@@ -19,21 +19,3 @@ Env = namedtuple('Env', [
     'subgrad_V',
     'lbd',
 ])
-
-NNEnv = namedtuple('NNEnv', [
-    'd',
-    'phi',
-    'phi_dw',
-    'phi_dtheta',
-    'V',
-    'V_dw',
-    'V_dtheta',
-    'y',
-    'w_bar',
-    'theta_bar',
-    'loss',
-    'loss_d1',
-    'forward',
-    'sigma',
-    'sigma_d',
-])
