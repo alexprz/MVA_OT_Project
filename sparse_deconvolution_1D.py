@@ -1,7 +1,6 @@
 """Implement the sparse deconvolution example of the paper."""
 import numpy as np
 
-import parameters
 
 
 class SparseDeconvolution():
@@ -19,7 +18,6 @@ class SparseDeconvolution():
             params : parameters.SD1Parameters object
 
         """
-        assert isinstance(params, parameters.SD1Parameters)
         self.params = params
         self.kernel = params.kernel
         self.w_bar = params.w_bar
