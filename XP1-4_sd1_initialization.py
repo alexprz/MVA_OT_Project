@@ -10,7 +10,7 @@ import plot
 
 np.random.seed(0)
 
-m = 20
+m = 100
 # We study 3 different initialisations
 initializations = {
     'no_separability': (np.zeros(m), .5*np.ones(m)),
