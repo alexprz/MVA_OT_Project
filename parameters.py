@@ -11,7 +11,9 @@ class BaseParameters(ABC):
 
     def __str__(self):
         """Give a str representation of the parameters."""
-        return ''.join([f'-{k}_{v}' for k, v in self.state_dict().items()])
+        return ''.join([
+            f'-{k}_{v}' for k, v in self.state_dict().items() if v is not None
+        ])
 
     @abstractmethod
     def state_dict(self):
@@ -67,7 +69,8 @@ class SD1Parameters(BaseParameters):
         self.fb_nu = fb_nu
         self.n = n
 
-        self.folder = None
+        self.name = None
+        self.subname = None
 
         assert isinstance(kernel, BaseKernel)
 
@@ -83,6 +86,7 @@ class SD1Parameters(BaseParameters):
             'fb_lbd': self.fb_lbd,
             'fb_nu': self.fb_nu,
             'n': self.n,
+            'which': self.subname,
         }
 
 
@@ -183,7 +187,7 @@ class XP13Params(SD1CommonParameters):
 class XP14Params(SD1CommonParameters):
     """Implement the parameters for the experiment 1.4 (init influence)."""
 
-    def __init__(self, w0, theta0):
+    def __init__(self, w0, theta0, name):
         """Init.
 
         Args:
@@ -201,3 +205,4 @@ class XP14Params(SD1CommonParameters):
             theta0=theta0,
         )
         self.name = 'XP1-4'
+        self.subname = name
