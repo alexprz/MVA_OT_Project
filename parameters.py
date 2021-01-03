@@ -3,6 +3,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 
 import kernels
+import sparse_deconvolution_1D as sd1
 
 
 class BaseParameters(ABC):
@@ -63,81 +64,72 @@ class SD1Parameters(BaseParameters):
         assert isinstance(kernel, kernels.BaseKernel)
 
 
-class SD1PaperParams(SD1Parameters):
-    """Implement the parameters of the paper for sparse deconvolution."""
+class SD1CommonParameters(BaseParameters):
+    """Store common parameters for the sparse deconvolution example."""
 
-    def __init__(self, m, w_bar, theta_bar, lbd, fb_gamma, fb_lbd, fb_nu, n, order=7):
+    def __init__(self, m, kernel):
+        """Init.
+
+        Args:
+        -----
+            kernel : kernels.BaseKernel object
+
+        """
+        np.random.seed(0)
+        m0 = 5
+        lbd = 0.2
+        w_bar, theta_bar = sd1.paper_ground_truth(m0)
+        super().__init__(
+            m0=m0,
+            w0=np.zeros(m),
+            theta0=np.arange(m)/m,
+            w_bar=w_bar,
+            theta_bar=theta_bar,
+            lbd=lbd,
+            n_iter=10000,
+            kernel=kernel,
+            fb_gamma=1,
+            fb_lbd=0.01,
+            fb_nu=1/lbd,
+            n=100,
+        )
+
+
+class XP11Params(SD1CommonParameters):
+    """Implement the parameters for the experiment 1.1 (Dirichlet kernel)."""
+
+    def __init__(self, m, order):
         """Init.
 
         Args:
         -----
             m : int
                 Number of particles in the gradient flow
-            lbd : float
-                Objective parameter
-            fb_gamma : float
-                Parameter of the FB algo
-            fb_lbd : float
-                Parameter of the FB algo
-            fb_nu : float
-                Parameter of the FB algo
-            n : int
-                Discretization for the integral computation
             order : int
                 Order of the Dirichlet kernel
 
         """
         super().__init__(
-            m0=5,
-            w0=np.zeros(m),
-            theta0=np.arange(m)/m,
-            w_bar=w_bar,
-            theta_bar=theta_bar,
-            lbd=lbd,
+            m=m,
             kernel=kernels.DirichletKernel(period=1, n=order),
-            n_iter=10000,
-            fb_gamma=fb_gamma,
-            fb_lbd=fb_lbd,
-            fb_nu=fb_nu,
-            n=n
         )
 
 
-class SD1GaussianParams(SD1Parameters):
-    """Implement custom parameters with gaussian for sparse deconvolution."""
+class XP12Params(SD1Parameters):
+    """Implement the parameters for the experiment 1.2 (Gaussian kernel)."""
 
-    def __init__(self, m, w_bar, theta_bar, lbd, fb_gamma, fb_lbd, fb_nu, sigma, n):
+    def __init__(self, m, sigma):
         """Init.
 
         Args:
         -----
             m : int
                 Number of particles in the gradient flow
-            lbd : float
-                Objective parameter
-            fb_gamma : float
-                Parameter of the FB algo
-            fb_lbd : float
-                Parameter of the FB algo
-            fb_nu : float
-                Parameter of the FB algo
             sigma : float
                 Width of the Gaussian kernel
-            n : int
-                Discretization for the integral computation
 
         """
         super().__init__(
-            m0=5,
-            w0=np.zeros(m),
-            theta0=np.arange(m)/m,
-            w_bar=w_bar,
-            theta_bar=theta_bar,
-            lbd=lbd,
+            m=m,
             kernel=kernels.GaussianKernel(sigma),
-            n_iter=10000,
-            fb_gamma=fb_gamma,
-            fb_lbd=fb_lbd,
-            fb_nu=fb_nu,
-            n=n
         )
