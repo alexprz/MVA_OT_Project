@@ -107,7 +107,7 @@ def plot_particle_flow_sd1(ws, thetas, params, w_compare=None,
     # ax.set_ylabel('$w$')
 
     if fig is not None:
-        plt.tight_layout()
+        plt.tight_layout(pad=0.1)
         savefig(params, name='particle_flow')
 
     return ax

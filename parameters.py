@@ -121,14 +121,14 @@ class SD1CommonParameters(SD1Parameters):
             w_bar=w_bar,
             theta_bar=theta_bar,
             lbd=lbd,
-            n_iter=30000,
+            n_iter=kwargs.get('n_iter', 10000),
             kernel=kwargs.get('kernel', DirichletKernel(period=1, n=7)),
             fb_gamma=kwargs.get('fb_gamma', 1),
             fb_lbd=kwargs.get('fb_lbd', 0.01),
             fb_nu=kwargs.get('fb_nu', 1/lbd),
             n=100,
-            tol=1e-1,
-            n_min=1000,
+            tol=None,  # 1e-1,
+            n_min=None,  # 5000,
         )
 
 

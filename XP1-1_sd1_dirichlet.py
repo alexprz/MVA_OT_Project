@@ -13,7 +13,7 @@ w_compare, theta_compare = None, None
 order = 7
 for i, m in enumerate([100, 10, 6]):
     print(f'----------m={m}----------')
-    params = parameters.XP11Params(m=m, order=order)
+    params = parameters.XP11Params(m=m, order=order, fb_gamma=0.03, fb_lbd=0.1)
     SD1 = sd1.SparseDeconvolution(params)
 
     # Apply the forward backward algorithm
@@ -33,9 +33,12 @@ for i, m in enumerate([100, 10, 6]):
     plot.plot_particle_flow_sd1(ws, thetas, params, w_compare, theta_compare,
                                 tol_compare=1e-1,
                                 label_compare=f'Converged positions\nfor m={val_compare}',
-                                norm_gradient=norm_gradient,
+                                norm_gradient=None,  # norm_gradient,
                                 display_legend=(i == 2),
                                 )
+
+plt.show()
+exit()
 
 m = 100
 for order in [1, 5, 25]:
