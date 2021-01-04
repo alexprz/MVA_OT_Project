@@ -10,6 +10,10 @@ class BaseActivation(ABC):
         """Shortcut to call the activation function."""
         return self.activation(s)
 
+    def __str__(self):
+        """Give a str representation of the parameters."""
+        return ''.join([f'-{k}_{v}' for k, v in self.state_dict().items()])
+
     @staticmethod
     @abstractmethod
     def activation(s):
@@ -20,6 +24,11 @@ class BaseActivation(ABC):
     @abstractmethod
     def derivative(s):
         """Implement the derivative of the activation function."""
+        return
+
+    @abstractmethod
+    def state_dict(self):
+        """Create a dict storing parameters."""
         return
 
 
@@ -57,6 +66,10 @@ class Sigmoid(BaseActivation):
         sigmoid = Sigmoid.activation(s)
         return sigmoid*(1 - sigmoid)
 
+    def state_dict(self):
+        """Create a dict storing parameters."""
+        return {'name': 'sigmoid'}
+
 
 class ReLU(BaseActivation):
     """Implement the ReLU activation function."""
@@ -90,3 +103,7 @@ class ReLU(BaseActivation):
 
         """
         return np.array(s > 0).astype(int)
+
+    def state_dict(self):
+        """Create a dict storing parameters."""
+        return {'name': 'relu'}

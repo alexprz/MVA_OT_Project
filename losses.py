@@ -12,6 +12,10 @@ class BaseLoss(ABC):
         """Shortcut to call the loss function."""
         return self.loss(y1, y2)
 
+    def __str__(self):
+        """Give a str representation of the parameters."""
+        return ''.join([f'-{k}_{v}' for k, v in self.state_dict().items()])
+
     @staticmethod
     @abstractmethod
     def loss(y1, y2):
@@ -22,6 +26,11 @@ class BaseLoss(ABC):
     @abstractmethod
     def derivative(y1, y2):
         """Implement the derivative of the loss function."""
+        return
+
+    @abstractmethod
+    def state_dict(self):
+        """Create a dict storing parameters."""
         return
 
 
@@ -60,6 +69,10 @@ class Squared(BaseLoss):
         """
         return y1 - y2
 
+    def state_dict(self):
+        """Create a dict storing parameters."""
+        return {'name': 'squared'}
+
 
 class Logistic(BaseLoss):
     """Implement the logistic loss function."""
@@ -97,3 +110,7 @@ class Logistic(BaseLoss):
         """
         sigmoid = act.Sigmoid.activation
         return -y2*sigmoid(-y1*y2)
+
+    def state_dict(self):
+        """Create a dict storing parameters."""
+        return {'name': 'logistic'}

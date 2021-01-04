@@ -174,7 +174,7 @@ def plot_particle_flow_tln(ws, thetas, params, w_compare=None,
             if tol_compare is not None and abs(w) < tol_compare:
                 continue
             label = label_compare if label is None else ''
-            lineplot(w, theta_compare[i, :], ax, linestyle='-', linewidth=0.5, color='cyan', label=label, zorder=2)
+            lineplot(w, theta_compare[i, :], ax, linestyle='-', linewidth=0.8, color='c', label=label, zorder=2)
 
 
 
