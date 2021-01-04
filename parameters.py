@@ -28,7 +28,7 @@ class SD1Parameters(BaseParameters):
     """Store parameters for the sparse deconvolution example."""
 
     def __init__(self, m0, w0, theta0, w_bar, theta_bar, lbd, kernel,
-                 n_iter, fb_gamma, fb_lbd, fb_nu, n):
+                 n_iter, fb_gamma, fb_lbd, fb_nu, n, tol=None, n_min=None):
         """Init.
 
         Args:
@@ -56,6 +56,10 @@ class SD1Parameters(BaseParameters):
                 Parameter of the FB algo
             n : int
                 Discretization for the integral computation
+            tol : float
+                Convergence tolerance on the norm of the gradient
+            n_min : int
+                Minimal number of iterations in opt algo
 
         """
         self.m0 = m0
@@ -71,6 +75,8 @@ class SD1Parameters(BaseParameters):
         self.fb_lbd = fb_lbd
         self.fb_nu = fb_nu
         self.n = n
+        self.tol = tol
+        self.n_min = n_min
 
         self.name = None
         self.subname = None
@@ -115,12 +121,14 @@ class SD1CommonParameters(SD1Parameters):
             w_bar=w_bar,
             theta_bar=theta_bar,
             lbd=lbd,
-            n_iter=10000,
+            n_iter=30000,
             kernel=kwargs.get('kernel', DirichletKernel(period=1, n=7)),
             fb_gamma=kwargs.get('fb_gamma', 1),
             fb_lbd=kwargs.get('fb_lbd', 0.01),
             fb_nu=kwargs.get('fb_nu', 1/lbd),
             n=100,
+            tol=1e-1,
+            n_min=1000,
         )
 
 

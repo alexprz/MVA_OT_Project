@@ -67,13 +67,19 @@ def forward_backward(env, print_every=None):
         ws.append(w)
         thetas.append(theta)
 
+        subgrad_w, subgrad_theta = env.subgrad_f_m(w, theta)  # , env.params.n)
+        e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
+
         # Check subgradient and objective value
         if print_every is not None and k % print_every == 0:
-            subgrad_w, subgrad_theta = env.subgrad_f_m(w, theta)#, env.params.n)
-            e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
             fm = env.f_m(w, theta, env.params.n)
-
             print(f'iter {k}: \t |∇fm|=={e:.2e} \t fm={fm:.2e}')
+
+        if env.params.tol is not None and e < env.params.tol:
+            if env.params.n_min is not None and env.params.n_min > k:
+                continue
+            print(f'Converged to tolerance {env.params.tol:.2e} in {k} iter.')
+            break
 
     return np.array(ws), np.array(thetas)
 
