@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 from losses import BaseLoss, Squared
 from activations import BaseActivation, ReLU
+from kernels import BaseKernel, DirichletKernel, GaussianKernel
 import sparse_deconvolution_1D as sd1
 import two_layer_nn as tln
 
