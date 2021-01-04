@@ -219,7 +219,7 @@ class SparseDeconvolution():
         fm = self.R(self.phi(w, theta, x).mean(axis=0)) + self.V(w, theta).mean()
         return fm.item()
 
-    def subgrad_f_m(self, w, theta, n=1000):
+    def subgrad_f_m(self, w, theta, n=None):
         """Evaluate a subgradient of the objective f_m.
 
         Args:
@@ -235,6 +235,7 @@ class SparseDeconvolution():
             subgrad_theta : np.array of shape (m, d)
 
         """
+        n = self.params.n if n is None else n
         x = np.linspace(self.x_min, self.x_max, n)
         grad_R = self.grad_R(w, theta, x)
         subgrad_V = self.subgrad_V(w, theta)

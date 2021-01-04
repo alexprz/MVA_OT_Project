@@ -69,11 +69,11 @@ def forward_backward(env, print_every=None):
 
         # Check subgradient and objective value
         if print_every is not None and k % print_every == 0:
-            subgrad_w, subgrad_theta = env.subgrad_f_m(w, theta, env.params.n)
+            subgrad_w, subgrad_theta = env.subgrad_f_m(w, theta)#, env.params.n)
             e = np.linalg.norm(subgrad_w) + np.linalg.norm(subgrad_theta)
             fm = env.f_m(w, theta, env.params.n)
 
-            print(f'iter {k}: \t e={e:.2e} \t fm={fm:.2e}')
+            print(f'iter {k}: \t |∇fm|=={e:.2e} \t fm={fm:.2e}')
 
     return np.array(ws), np.array(thetas)
 
