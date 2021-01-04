@@ -13,10 +13,10 @@ plt.rcParams.update({
 })
 
 
-def get_ax(ax):
+def get_ax(ax, figsize=None):
     """Create an ax if ax is None."""
     if ax is None:
-        fig = plt.figure()
+        fig = plt.figure(figsize=figsize)
         return fig, plt.gca()
     return None, ax
 
@@ -41,7 +41,10 @@ def savefig(params, name=''):
     plt.savefig(f'{folder}{name}{params}.jpg')
 
 
-def plot_particle_flow_sd1(ws, thetas, params, ax=None):
+def plot_particle_flow_sd1(ws, thetas, params, w_compare=None,
+                           theta_compare=None, tol_compare=None,
+                           label_compare=None, norm_gradient=None,
+                           display_legend=True, figsize=(9,6), ax=None):
     """Plot the particle flow in sparse deconvolution.
 
     Args:
@@ -49,24 +52,44 @@ def plot_particle_flow_sd1(ws, thetas, params, ax=None):
         ws : np.array of shape (n_iter, m)
         thetas : np.array of shape (n_iter, m)
         params : parameters.BaseParameters object
+        w_compare : np.array of shape (m,)
+        theta_compare : np.array of shape (m,)
         ax : matplotlib ax
 
     """
-    fig, ax = get_ax(ax)
+    fig, ax = get_ax(ax, figsize)
 
-    # Print the optimal positions
+    # Print 0 line
+    ax.axhline(0, color='black', linestyle='-', linewidth=1)
+
+    # Print the positions of ground truth
     for i, theta in enumerate(params.theta_bar):
         sign = np.sign(params.w_bar[i])
         ymin, ymax = (0.5, 1) if sign > 0 else (0, 0.5)
-        label = 'Optimal positions' if i == 0 else ''
+        label = 'Truth positions' if i == 0 else None
         ax.axvline(theta, ymin=ymin, ymax=ymax, color='black', linestyle='--',
                    linewidth=1, label=label)
 
+    # Print the positions to compare
+    label = None
+    if w_compare is not None and theta_compare is not None:
+        for i, theta in enumerate(w_compare):
+            if tol_compare is not None and abs(w_compare[i]) < tol_compare:
+                continue
+            sign = np.sign(w_compare[i])
+            ymin, ymax = (0.5, 1) if sign > 0 else (0, 0.5)
+            label = label_compare if label is None else ''
+            ax.axvline(theta_compare[i], ymin=ymin, ymax=ymax, color='cyan',
+                       linestyle='--', linewidth=1, label=label)
+
     # Plot initial particles
-    ax.scatter(params.theta0, params.w0, color='blue', marker='.')
+    ax.scatter(params.theta0, params.w0, color='blue', marker='.', label='Initial particle\npositions')
 
     # Plot the final particles
-    ax.scatter(thetas[-1, :], ws[-1, :], color='red', marker='.', label='Particle')
+    label = 'Final particles'
+    if norm_gradient is not None:
+        label = f'{label}\n$\\|\\partial F_m\\|_2={norm_gradient:.0e}$'
+    ax.scatter(thetas[-1, :], ws[-1, :], color='red', marker='.', label=label)
 
     # Plot the particles' trajectories during optimization
     for k in range(params.m):
@@ -77,7 +100,11 @@ def plot_particle_flow_sd1(ws, thetas, params, ax=None):
     y_min, y_max = ax.get_ylim()
     max_ylim = max(abs(y_min), abs(y_max))
     ax.set_ylim(-max_ylim, max_ylim)
-    ax.legend()
+    if display_legend:
+        ax.legend()
+
+    # ax.set_xlabel('$\\theta$')
+    # ax.set_ylabel('$w$')
 
     if fig is not None:
         plt.tight_layout()
