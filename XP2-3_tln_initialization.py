@@ -69,5 +69,4 @@ for i, (name, (w0, theta0)) in enumerate(initializations.items()):
                                 display_legend=(i == 1),
                                 )
 
-plt.tight_layout()
 plt.show()
