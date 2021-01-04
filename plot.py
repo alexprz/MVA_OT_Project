@@ -44,7 +44,7 @@ def savefig(params, name=''):
 def plot_particle_flow_sd1(ws, thetas, params, w_compare=None,
                            theta_compare=None, tol_compare=None,
                            label_compare=None, norm_gradient=None,
-                           display_legend=True, figsize=(9,6), ax=None):
+                           display_legend=True, figsize=(9, 6), ax=None):
     """Plot the particle flow in sparse deconvolution.
 
     Args:
@@ -73,10 +73,10 @@ def plot_particle_flow_sd1(ws, thetas, params, w_compare=None,
     # Print the positions to compare
     label = None
     if w_compare is not None and theta_compare is not None:
-        for i, theta in enumerate(w_compare):
-            if tol_compare is not None and abs(w_compare[i]) < tol_compare:
+        for i, w in enumerate(w_compare):
+            if tol_compare is not None and abs(w) < tol_compare:
                 continue
-            sign = np.sign(w_compare[i])
+            sign = np.sign(w)
             ymin, ymax = (0.5, 1) if sign > 0 else (0, 0.5)
             label = label_compare if label is None else ''
             ax.axvline(theta_compare[i], ymin=ymin, ymax=ymax, color='cyan',
@@ -122,12 +122,19 @@ def scatterplot(w, theta, ax, **kwargs):
 
 def lineplot(w, theta, ax, **kwargs):
     """Draw lines between (0, 0) and particles."""
+    w = np.array(w).reshape(-1)
+    theta = np.array(theta)
+    if theta.ndim == 1:
+        theta = theta.reshape(1, -1)
     x = np.stack((np.zeros_like(w), w*theta[:, 0]), axis=0)
     y = np.stack((np.zeros_like(w), w*theta[:, 1]), axis=0)
-    ax.plot(1e1*x, 1e1*y, **kwargs)
+    ax.plot(1e2*x, 1e2*y, **kwargs)
 
 
-def plot_particle_flow_tln(ws, thetas, params, ax=None):
+def plot_particle_flow_tln(ws, thetas, params, w_compare=None,
+                           theta_compare=None, tol_compare=None,
+                           label_compare=None,
+                           display_legend=True, figsize=(9, 6), ax=None):
     """Plot the particle flow in two-layers network example.
 
     Args:
@@ -139,32 +146,45 @@ def plot_particle_flow_tln(ws, thetas, params, ax=None):
 
     """
     w_final, theta_final = ws[-1, ...], thetas[-1, ...]
-
-    # Plot ground truth
-    fig, ax = get_ax(ax)
-    scatterplot(params.w_bar, params.theta_bar, ax, marker='+', color='orange')
-    ax.set_xlabel(r'$\theta_1$')
-    ax.set_ylabel(r'$\theta_2$')
-    ax.set_title('Trajectories of the particles')
+    fig, ax = get_ax(ax, figsize)
 
     # Plot particle paths and start/end
-    scatterplot(params.w0, params.theta0, ax, color='blue', marker='.')
-    scatterplot(w_final, theta_final, ax, color='red', marker='.')
+    scatterplot(params.w0, params.theta0, ax, color='blue', marker='.', label='Initial particles', zorder=3)
     for k in range(params.m):
         label = 'Flow' if k == 0 else ''
-        ax.plot(ws[:, k]*thetas[:, k, 0], ws[:, k]*thetas[:, k, 1], color='green', linewidth=.5, label=label)#, marker='o', markersize=1)
+        ax.plot(ws[:, k]*thetas[:, k, 0], ws[:, k]*thetas[:, k, 1], color='green', linewidth=.5, label=label, zorder=4)#, marker='o', markersize=1)
+    scatterplot(w_final, theta_final, ax, color='red', marker='.', s=50, label='Final particles', zorder=5)
 
-    # Plot lines of optimal positions
     x_min, x_max = ax.get_xlim()
     y_min, y_max = ax.get_ylim()
-    lineplot(params.w_bar, params.theta_bar, ax, linestyle='--', color='black', label='Optimal positions')
+
+    # Plot ground truth
+    scatterplot(params.w_bar, params.theta_bar, ax, marker='+', color='orange', label='Truth positions', zorder=1)
+
+    # Plot lines of truth positions
+    label = None
+    for i, w in enumerate(params.w_bar):
+        label = 'Truth positions' if label is None else ''
+        lineplot(w, params.theta_bar[i, :], ax, linestyle='--', linewidth=0.5, color='black', label=label, zorder=0)
+
+    # Plot lines of positions to compare
+    label = None
+    if w_compare is not None and theta_compare is not None:
+        for i, w in enumerate(w_compare):
+            if tol_compare is not None and abs(w) < tol_compare:
+                continue
+            label = label_compare if label is None else ''
+            lineplot(w, theta_compare[i, :], ax, linestyle='-', linewidth=0.5, color='cyan', label=label, zorder=2)
+
+
+
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_min, y_max)
-    ax.legend()
-    lineplot(w_final, theta_final, ax, linestyle=':', color='cyan')
+    if display_legend:
+        ax.legend()
 
     if fig is not None:
-        plt.tight_layout()
+        plt.tight_layout(pad=0.1)
         savefig(params, name='particle_flow')
 
     return ax
