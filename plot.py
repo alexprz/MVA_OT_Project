@@ -128,7 +128,7 @@ def lineplot(w, theta, ax, **kwargs):
         theta = theta.reshape(1, -1)
     x = np.stack((np.zeros_like(w), w*theta[:, 0]), axis=0)
     y = np.stack((np.zeros_like(w), w*theta[:, 1]), axis=0)
-    ax.plot(1e2*x, 1e2*y, **kwargs)
+    ax.plot(1e4*x, 1e4*y, **kwargs)
 
 
 def plot_particle_flow_tln(ws, thetas, params, w_compare=None,
@@ -164,7 +164,7 @@ def plot_particle_flow_tln(ws, thetas, params, w_compare=None,
     # Plot lines of truth positions
     label = None
     for i, w in enumerate(params.w_bar):
-        label = 'Truth positions' if label is None else ''
+        label = 'Truth directions' if label is None else ''
         lineplot(w, params.theta_bar[i, :], ax, linestyle='--', linewidth=0.5, color='black', label=label, zorder=0)
 
     # Plot lines of positions to compare

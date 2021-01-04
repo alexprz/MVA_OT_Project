@@ -12,7 +12,8 @@ np.random.seed(0)
 w_compare, theta_compare = None, None
 for i, m in enumerate([100, 10, 6]):
     print(f'----------m={m}----------')
-    params = parameters.XP21Params(m=m, sgd_gamma=1e-3, sgd_n_iter=10000)
+    # params = parameters.XP21Params(m=m, sgd_gamma=1e-3, sgd_n_iter=10000)
+    params = parameters.XP21Params(m=m, sgd_gamma=1, sgd_n_iter=10000)
     TLN = tln.TwoLayerNN(params)
 
     # Apply the forward backward algorithm

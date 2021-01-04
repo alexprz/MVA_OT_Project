@@ -11,16 +11,9 @@ import plot
 np.random.seed(0)
 
 m = 100
-# params_compare = parameters.XP21Params(m=m, sgd_gamma=1e-3, sgd_n_iter=10000)
-# TLN = tln.TwoLayerNN(params_compare)
-# ws, thetas, *_ = opt.SGD(TLN, print_every=100)
-# w_compare, theta_compare = ws[-1, ...], thetas[-1, ...]
-# val_compare = params_compare.lbd
 w_compare, theta_compare = None, None
-# for i, lbd in enumerate([1e6, 1e3, 1e1]):
-# for i, lbd in enumerate([1e-3, 1e-1, 1e-6]):
+
 for i, lbd in enumerate([1e-3, 1.2e-1, 1e-5]):
-# for i, lbd in enumerate([1.2e-1]):
     print(f'----------m={m}----------')
     params = parameters.XP22Params(m=m, lbd=lbd, sgd_n_iter=10000)
     TLN = tln.TwoLayerNN(params)
