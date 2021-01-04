@@ -37,10 +37,6 @@ for i, m in enumerate([100, 10, 6]):
                                 display_legend=(i == 2),
                                 )
 
-plt.tight_layout()
-plt.show()
-exit()
-
 m = 100
 for order in [1, 5, 25]:
     print(f'----------m={order}----------')
