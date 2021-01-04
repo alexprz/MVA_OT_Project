@@ -9,21 +9,40 @@ import plot
 
 
 np.random.seed(0)
-
-sigma = 0.1
-for m in [6, 10, 100]:
+w_compare, theta_compare = None, None
+sigma = 0.01
+for i, m in enumerate([100, 10, 6]):
     print(f'----------m={m}----------')
-    params = parameters.XP12Params(m=m, sigma=sigma, fb_gamma=0.2, lbd=1e-10)
+    if m == 100:
+        params = parameters.XP12Params(m=m, sigma=sigma, n_iter=10000, lbd=2, fb_gamma=0.005, fb_lbd=0.01)
+    else:
+        params = parameters.XP12Params(m=m, sigma=sigma, n_iter=10000, lbd=2, fb_gamma=0.0001, fb_lbd=0.01)
     SD1 = sd1.SparseDeconvolution(params)
 
     # Apply the forward backward algorithm
     ws, thetas = opt.forward_backward(SD1, print_every=100)
 
+    # The first result in the one of reference
+    if w_compare is None or theta_compare is None:
+        w_compare, theta_compare = ws[-1, ...], thetas[-1, ...]
+        val_compare = m
+
     # Dump arrays
     plot.dump(ws, thetas, params)
 
     # Plot particle flow
-    plot.plot_particle_flow_sd1(ws, thetas, params)
+    grad_w, subgrad_theta = SD1.subgrad_f_m(ws[-1, :], thetas[-1, :])
+    norm_gradient = np.linalg.norm(grad_w) + np.linalg.norm(subgrad_theta)
+    plot.plot_particle_flow_sd1(ws, thetas, params, w_compare=None,
+                                theta_compare=None,
+                                tol_compare=1e-1,
+                                label_compare=f'Converged positions\nfor m={val_compare}',
+                                norm_gradient=None,  # norm_gradient,
+                                display_legend=(i == 2),
+                                )
+
+plt.show()
+exit()
 
 m = 100
 for sigma in [1e-3, 1e-1, 1]:
