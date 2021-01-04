@@ -17,7 +17,6 @@ initializations = {
     'no_separability': (np.zeros(m), .5*np.ones(m)),
     'unbalanced_dist': (np.zeros(m), np.arange(m)/(10*m)),
     'unbalanced_sep': (np.zeros(m), np.logspace(-10, 0, m)),
-    # 'non_zero_weights': (-np.ones(m), np.arange(m)/m),
     'non_zero_weights': (-np.linspace(-1, 1, m), np.arange(m)/m),
 }
 
@@ -28,11 +27,7 @@ for i, (name, (w0, theta0)) in enumerate(initializations.items()):
     elif i == 1:
         params = parameters.XP14Params(w0=w0, theta0=theta0, name=name, lbd=0.02)
     elif i == 3:
-        # params = parameters.XP14Params(w0=w0, theta0=theta0, name=name, lbd=.5, fb_gamma=1.99)
-        # params = parameters.XP14Params(w0=w0, theta0=theta0, name=name, n_iter=30000, lbd=.5, kernel=kernels.DirichletKernel(1, 25), fb_gamma=1.99)
-        # params = parameters.XP14Params(w0=w0, theta0=theta0, name=name, n_iter=20000, lbd=.5, kernel=kernels.DirichletKernel(1, 25), fb_gamma=1.99)#, fb_lbd=0.1)
-        # params = parameters.XP14Params(w0=w0, theta0=theta0, name=name, n_iter=20000, lbd=.5, fb_gamma=1.99)#, fb_lbd=0.1)
-        params = parameters.XP14Params(w0=w0, theta0=theta0, name=name, lbd=.5)#, fb_lbd=0.1)
+        params = parameters.XP14Params(w0=w0, theta0=theta0, name=name, n_iter=30000, lbd=.5)#, fb_lbd=0.1)
     SD1 = sd1.SparseDeconvolution(params)
 
     # Apply the forward backward algorithm
