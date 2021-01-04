@@ -19,7 +19,7 @@ class TwoLayerNN():
         self.w_bar = params.w_bar
         self.theta_bar = params.theta_bar
 
-        self.beta = 1/params.lbd
+        self.beta = params.lbd
         self.params = params
 
         # Estimate the mean value of the ground truth y_bar

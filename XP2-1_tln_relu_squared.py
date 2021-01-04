@@ -33,5 +33,4 @@ for i, m in enumerate([100, 10, 6]):
                                 display_legend=(i == 2),
                                 )
 
-
 plt.show()

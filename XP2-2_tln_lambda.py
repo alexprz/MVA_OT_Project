@@ -11,19 +11,36 @@ import plot
 np.random.seed(0)
 
 m = 100
-for lbd in [1e6, 1e3, 1e1]:
+# params_compare = parameters.XP21Params(m=m, sgd_gamma=1e-3, sgd_n_iter=10000)
+# TLN = tln.TwoLayerNN(params_compare)
+# ws, thetas, *_ = opt.SGD(TLN, print_every=100)
+# w_compare, theta_compare = ws[-1, ...], thetas[-1, ...]
+# val_compare = params_compare.lbd
+w_compare, theta_compare = None, None
+# for i, lbd in enumerate([1e6, 1e3, 1e1]):
+# for i, lbd in enumerate([1e-3, 1e-1, 1e-6]):
+for i, lbd in enumerate([1e-3, 1.2e-1, 1e-5]):
+# for i, lbd in enumerate([1.2e-1]):
     print(f'----------m={m}----------')
-    params = parameters.XP22Params(m=m, lbd=lbd)
+    params = parameters.XP22Params(m=m, lbd=lbd, sgd_n_iter=10000)
     TLN = tln.TwoLayerNN(params)
 
     # Apply the forward backward algorithm
     ws, thetas, *_ = opt.SGD(TLN, print_every=100)
 
+    # The first result in the one of reference
+    if w_compare is None or theta_compare is None:
+        w_compare, theta_compare = ws[-1, ...], thetas[-1, ...]
+        val_compare = lbd
+
     # Dump arrays
     plot.dump(ws, thetas, params)
 
     # Plot particle flow
-    plot.plot_particle_flow_tln(ws, thetas, params)
+    plot.plot_particle_flow_tln(ws, thetas, params, w_compare, theta_compare,
+                                tol_compare=1e-1,
+                                label_compare=f'Optimal positions\nfor $\\lambda={val_compare}$',
+                                display_legend=(i == 2),
+                                )
 
-plt.tight_layout()
 plt.show()

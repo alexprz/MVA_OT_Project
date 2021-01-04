@@ -304,7 +304,7 @@ class TLNCommonParameters(TLNParameters):
         """
         np.random.seed(0)
         m0 = 4
-        lbd = kwargs.get('lbd', 1/0.002)
+        lbd = kwargs.get('lbd', 0.002)
         w_bar, theta_bar = tln.paper2_ground_truth(m0)
         eps = kwargs.get('eps', 1e-1)
         w0 = eps*np.ones(m)

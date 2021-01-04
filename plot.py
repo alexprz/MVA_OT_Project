@@ -176,8 +176,6 @@ def plot_particle_flow_tln(ws, thetas, params, w_compare=None,
             label = label_compare if label is None else ''
             lineplot(w, theta_compare[i, :], ax, linestyle='-', linewidth=0.8, color='c', label=label, zorder=2)
 
-
-
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_min, y_max)
     if display_legend:
