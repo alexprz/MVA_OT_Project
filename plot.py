@@ -152,14 +152,14 @@ def plot_particle_flow_tln(ws, thetas, params, w_compare=None,
     scatterplot(params.w0, params.theta0, ax, color='blue', marker='.', label='Initial particles', zorder=3)
     for k in range(params.m):
         label = 'Flow' if k == 0 else ''
-        ax.plot(ws[:, k]*thetas[:, k, 0], ws[:, k]*thetas[:, k, 1], color='green', linewidth=.5, label=label, zorder=4)#, marker='o', markersize=1)
+        ax.plot(ws[:, k]*thetas[:, k, 0], ws[:, k]*thetas[:, k, 1], color='lightgreen', linewidth=.1, label=label, zorder=4)#, marker='o', markersize=1)
     scatterplot(w_final, theta_final, ax, color='red', marker='.', s=50, label='Final particles', zorder=5)
 
     x_min, x_max = ax.get_xlim()
     y_min, y_max = ax.get_ylim()
 
     # Plot ground truth
-    scatterplot(params.w_bar, params.theta_bar, ax, marker='+', color='orange', label='Truth positions', zorder=1)
+    # scatterplot(params.w_bar, params.theta_bar, ax, marker='+', color='orange', label='Truth positions', zorder=1)
 
     # Plot lines of truth positions
     label = None

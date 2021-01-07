@@ -30,7 +30,6 @@ class TwoLayerNN():
     @property
     def d(self):
         """Dimension of the input samples."""
-        # return self.theta_bar.shape[1] - 1
         return self.theta_bar.shape[1]
 
     def layer1(self, theta, x, use_derivative=False):
@@ -49,8 +48,6 @@ class TwoLayerNN():
 
         """
         act = self.activation.derivative if use_derivative else self.activation
-        # x = x.reshape(-1, 1) if x.ndim == 1 else x
-        # x = np.concatenate((x, np.ones((x.shape[0], 1))), axis=1)
         return act(np.inner(x, theta))
 
     def layer2(self, w, theta, x):
@@ -148,20 +145,10 @@ class TwoLayerNN():
             np.array of shape (n, m, d)
 
         """
-        d1 = self._phi_dtheta1(w, theta, x)
-        # d2 = self._phi_dtheta2(w, theta, x)[:, :, None]
-
-        # print('d1', d1.shape)
-        # print('d2', d2.shape)
-        # return np.concatenate((d1, d2), axis=2)
-        return d1
+        return = self._phi_dtheta1(w, theta, x)
 
     def to_class(self, y):
         return y
-        # y_class = np.copy(y)
-        # y_class[y >= self.y_bar_mean] = 1
-        # y_class[y < self.y_bar_mean] = -1
-        # return y_class
 
     def y(self, w, theta, x):
         """Implement the output function.
@@ -191,7 +178,6 @@ class TwoLayerNN():
             np.array of shape (n,)
 
         """
-        # return self.layer2(self.w_bar, self.theta_bar, x)
         return self.y(self.w_bar, self.theta_bar, x)
 
     # def Vm(self, w, theta):

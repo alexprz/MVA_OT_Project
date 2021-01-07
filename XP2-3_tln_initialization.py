@@ -29,23 +29,22 @@ initializations = {
     'half_space': (np.ones(m), neg_circle),
 }
 
-params_compare = parameters.XP21Params(m=m)
-TLN = tln.TwoLayerNN(params_compare)
-ws, thetas, *_ = opt.SGD(TLN, print_every=100)
-w_compare, theta_compare = ws[-1, ...], thetas[-1, ...]
-val_compare = params_compare.lbd
-val_compare = m
+# params_compare = parameters.XP21Params(m=m)
+# TLN = tln.TwoLayerNN(params_compare)
+# ws, thetas, *_ = opt.SGD(TLN, print_every=100)
+# w_compare, theta_compare = ws[-1, ...], thetas[-1, ...]
+# val_compare = params_compare.lbd
+# val_compare = m
 
-# w_compare, theta_compare = None, None
+w_compare, theta_compare = None, None
 
 for i, (name, (w0, theta0)) in enumerate(initializations.items()):
     print(f'----------{name}----------')
     if i == 0:
         params = parameters.XP23Params(w0=w0, theta0=theta0, name=name,
-                                       sgd_gamma=1e-2)
+                                       sgd_gamma=1e-2, sgd_n_iter=1000)
     else:
-        params = parameters.XP23Params(w0=w0, theta0=theta0, name=name,
-                                       sgd_gamma=1)
+        params = parameters.XP23Params(w0=w0, theta0=theta0, name=name, sgd_n_iter=1000)
 
     TLN = tln.TwoLayerNN(params)
 
@@ -62,8 +61,8 @@ for i, (name, (w0, theta0)) in enumerate(initializations.items()):
 
     # Plot particle flow
     plot.plot_particle_flow_tln(ws, thetas, params,
-                                w_compare,
-                                theta_compare,
+                                w_compare=None,
+                                theta_compare=None,
                                 tol_compare=1e-1,
                                 label_compare=f'Optimal positions\nfor $m={val_compare}$',
                                 display_legend=(i == 1),

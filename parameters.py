@@ -319,9 +319,9 @@ class TLNCommonParameters(TLNParameters):
             lbd=lbd,
             loss=kwargs.get('loss', Squared()),
             activation=kwargs.get('activation', ReLU()),
-            sgd_n_iter=kwargs.get('sgd_n_iter', 10000),
+            sgd_n_iter=kwargs.get('sgd_n_iter', 50000),
             sgd_gamma=kwargs.get('sgd_gamma', 1),
-            sgd_bs=15,
+            sgd_bs=kwargs.get('sgd_bs', 150),
         )
 
 

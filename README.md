@@ -35,3 +35,5 @@ Other files implement miscelanious functions and classes:
 * `parameters.py` the classes structuring the parameters of each example, the common parameters and the custom parameters for each experiment.
 * `plot.py` the functions used to plot the results.
 * `tests.py` some tests.
+* `requirements.txt` the required package for reproducting the examples.
+* `requirements_test.txt` the additional packages required for testing.

@@ -106,15 +106,13 @@ def SGD(env, print_every=None):
     norm_grad_Rms, norm_grad_Vms = [], []
     m = w.shape[0]
 
-    # Sample a batch
-    # mean, cov = np.zeros(env.d), 1e4*np.eye(env.d)
-    # x = np.random.multivariate_normal(mean, cov, size=bs)
-    x = np.random.normal(0, 1, size=(env.params.sgd_bs, env.d))
-    x /= norm(x, axis=1)[:, None]
-
     for k in range(env.params.sgd_n_iter):
+        # Sample a batch
+        x = np.random.normal(0, 1, size=(env.params.sgd_bs, env.d))
+        x /= norm(x, axis=1)[:, None]
+
         # Adjust step size
-        gamma = env.params.sgd_gamma  #/np.power(k+1, .51)
+        gamma = env.params.sgd_gamma   #/np.power(k+1, .51)
 
         # Compute the gradient over the batch
         grad_w, grad_theta = env.grad_fm(w, theta, x)

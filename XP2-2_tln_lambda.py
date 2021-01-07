@@ -15,7 +15,7 @@ w_compare, theta_compare = None, None
 
 for i, lbd in enumerate([1e-3, 1.2e-1, 1e-5]):
     print(f'----------m={m}----------')
-    params = parameters.XP22Params(m=m, lbd=lbd, sgd_n_iter=10000)
+    params = parameters.XP22Params(m=m, lbd=lbd)
     TLN = tln.TwoLayerNN(params)
 
     # Apply the forward backward algorithm
@@ -30,7 +30,7 @@ for i, lbd in enumerate([1e-3, 1.2e-1, 1e-5]):
     plot.dump(ws, thetas, params)
 
     # Plot particle flow
-    plot.plot_particle_flow_tln(ws, thetas, params, w_compare, theta_compare,
+    plot.plot_particle_flow_tln(ws, thetas, params, w_compare=None, theta_compare=None,
                                 tol_compare=1e-1,
                                 label_compare=f'Optimal positions\nfor $\\lambda={val_compare}$',
                                 display_legend=(i == 2),

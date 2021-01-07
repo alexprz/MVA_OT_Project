@@ -10,10 +10,9 @@ import plot
 
 np.random.seed(0)
 w_compare, theta_compare = None, None
-for i, m in enumerate([100, 10, 6]):
+for i, m in enumerate([100, 10, 5]):
     print(f'----------m={m}----------')
-    # params = parameters.XP21Params(m=m, sgd_gamma=1e-3, sgd_n_iter=10000)
-    params = parameters.XP21Params(m=m, sgd_gamma=1, sgd_n_iter=10000)
+    params = parameters.XP21Params(m=m)
     TLN = tln.TwoLayerNN(params)
 
     # Apply the forward backward algorithm
@@ -28,7 +27,7 @@ for i, m in enumerate([100, 10, 6]):
     plot.dump(ws, thetas, params)
 
     # Plot particle flow
-    plot.plot_particle_flow_tln(ws, thetas, params, w_compare, theta_compare,
+    plot.plot_particle_flow_tln(ws, thetas, params, w_compare=None, theta_compare=None,
                                 tol_compare=1e-1,
                                 label_compare=f'Optimal positions\nfor $m={val_compare}$',
                                 display_legend=(i == 2),

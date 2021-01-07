@@ -20,7 +20,7 @@ w_compare, theta_compare = None, None
 # val_compare = params_compare.lbd
 # val_compare = m
 
-for i, m in enumerate([100, 10, 6]):
+for i, m in enumerate([100, 10, 5]):
     print(f'----------m={m}----------')
     params = parameters.XP24Params(m=m, loss=losses.Logistic())
     TLN = tln.TwoLayerNN(params)
@@ -37,7 +37,7 @@ for i, m in enumerate([100, 10, 6]):
     plot.dump(ws, thetas, params)
 
     # Plot particle flow
-    plot.plot_particle_flow_tln(ws, thetas, params, w_compare, theta_compare,
+    plot.plot_particle_flow_tln(ws, thetas, params, w_compare=None, theta_compare=None,
                                 tol_compare=1e-1,
                                 label_compare=f'Optimal positions\nfor $m={val_compare}$',
                                 display_legend=(i == 2),
