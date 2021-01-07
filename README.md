@@ -1,4 +1,4 @@
-# Stuy of particle gradient flow
+# Study of minimization using particle gradient flow
 
 ## Code organisation
 
@@ -37,3 +37,7 @@ Other files implement miscelanious functions and classes:
 * `tests.py` some tests.
 * `requirements.txt` the required package for reproducting the examples.
 * `requirements_test.txt` the additional packages required for testing.
+
+### References:
+
+[1] Lenaic  Chizat  and  Francis  Bach.   On  the  Global  Convergence  of  Gra-dient Descent for Over-parameterized Models using Optimal Transport.

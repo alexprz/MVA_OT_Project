@@ -54,14 +54,6 @@ def forward_backward(env, print_every=None):
     w, theta = np.copy(env.params.w0), np.copy(env.params.theta0)
     ws, thetas = [], []
 
-    # Parameters of the algorithm
-    # nu = 8e3/env.lbd  # gaussian
-    # nu = 1/env.params.lbd
-    # nu = 5e2/env.lbd  # paper
-    # gamma = 1/nu
-    # delta = 2 - gamma*nu/2
-    # lbd = 0.01*delta
-
     for k in range(env.params.n_iter):
         w, theta = forward_backward_step(env, w, theta)
         ws.append(w)
