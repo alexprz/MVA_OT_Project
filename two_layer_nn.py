@@ -145,7 +145,7 @@ class TwoLayerNN():
             np.array of shape (n, m, d)
 
         """
-        return = self._phi_dtheta1(w, theta, x)
+        return self._phi_dtheta1(w, theta, x)
 
     def to_class(self, y):
         return y
